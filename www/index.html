@@ -3266,10 +3266,10 @@ requestAnimationFrame(()=> moveLens(0));
       const r=await fetch('/api/gemini/status',{cache:'no-store'});
       const data=await r.json();
       geminiConfigured=!!(r.ok&&data.configured);
-      $('geminiState').textContent=geminiConfigured?'Server key ready ✓':'Add GEMINI_API_KEY to .env';
+      $('geminiState').textContent=geminiConfigured?'Server key ready ✓':'AI server key unavailable';
     }catch(e){
       geminiConfigured=false;
-      $('geminiState').textContent='Start with npm run dev';
+      $('geminiState').textContent='Gemini server unavailable';
     }
     return geminiConfigured;
   }
@@ -3281,13 +3281,18 @@ requestAnimationFrame(()=> moveLens(0));
 
   async function gemini(parts,schema){
     const model=(lget(K_MODEL)||DEFAULT_MODEL).trim();
+    let token;
+    try{
+      if(typeof window.classmarkGetIdToken!=='function') throw new Error('');
+      token=await window.classmarkGetIdToken();
+    }catch(e){ throw new Error('Sign in again to use Gemini features.'); }
     let res;
     try{
       res=await fetch('/api/gemini/generate',{
-        method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({parts,schema,model})
+        method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({parts,schema,model})
       });
     }catch(e){
-      throw new Error('Could not reach the local Gemini server. Start the app with npm run dev.');
+      throw new Error('Could not reach the Gemini service. Check your connection and try again.');
     }
     if(!res.ok){
       let msg=''; try{ const payload=await res.json(); msg=payload&&payload.error||''; }catch(e){}
@@ -3428,10 +3433,10 @@ ${sourceText}`;
     reader.onload=()=>{
       const img=new Image();
       img.onload=()=>{
-        const scale=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight));
+        const scale=Math.min(1,1200/Math.max(img.naturalWidth,img.naturalHeight));
         const canvas=document.createElement('canvas'); canvas.width=Math.round(img.naturalWidth*scale); canvas.height=Math.round(img.naturalHeight*scale);
         canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
-        attendanceImage=canvas.toDataURL('image/jpeg',.78); $('aiImagePreview').src=attendanceImage; $('aiImageWrap').style.display='block';
+        attendanceImage=canvas.toDataURL('image/jpeg',.68); $('aiImagePreview').src=attendanceImage; $('aiImageWrap').style.display='block';
         showToast('Attendance screenshot ready to read');
       };
       img.onerror=()=>showToast('Could not read this image. Try a JPG or PNG screenshot.');
@@ -3462,7 +3467,7 @@ ${sourceText}`;
         showToast('Gemini could not finish; showing locally recognized rows for review');
       }
     }else if(attendanceImage){
-      showToast('Add GEMINI_API_KEY to .env for screenshot reading, then restart npm run dev'); return;
+      showToast('Gemini is not configured for this website yet. You can still add the schedule manually.'); return;
     }
     if(!items.length){ showToast('Could not read this format. Copy the table with its column headings or upload a screenshot.'); return; }
     renderPreview(items);
@@ -3493,7 +3498,7 @@ ${sourceText}`;
   $('geminiGuideBtn').onclick=openGuide;
   $('guideClose').onclick=closeGuide;
   $('guideOpen').onclick=()=>window.open(AISTUDIO,'_blank');
-  $('geminiSaveBtn').onclick=async()=>{ lset(K_MODEL,$('geminiModelInput').value.trim()); await checkGemini(); showToast(geminiConfigured?'Server Gemini key is ready':'Add GEMINI_API_KEY to .env, then restart npm run dev'); };
+  $('geminiSaveBtn').onclick=async()=>{ lset(K_MODEL,$('geminiModelInput').value.trim()); await checkGemini(); showToast(geminiConfigured?'Server Gemini key is ready':'Gemini is not configured for this website yet'); };
   $('geminiModelInput').onchange=()=>lset(K_MODEL,$('geminiModelInput').value.trim());
   refreshUI(); checkGemini();
 })();
@@ -3555,10 +3560,10 @@ ${sourceText}`;
     reader.onload=()=>{
       const img=new Image();
       img.onload=()=>{
-        const scale=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight));
+        const scale=Math.min(1,1200/Math.max(img.naturalWidth,img.naturalHeight));
         const canvas=document.createElement('canvas'); canvas.width=Math.round(img.naturalWidth*scale); canvas.height=Math.round(img.naturalHeight*scale);
         canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
-        settings.timetablePhoto=canvas.toDataURL('image/jpeg',.78); save(); renderTimetable();
+        settings.timetablePhoto=canvas.toDataURL('image/jpeg',.68); save(); renderTimetable();
         showToast('Timetable photo saved on this device');
       };
       img.onerror=()=>showToast('Could not read this image. Try a JPG or PNG screenshot.');
@@ -3584,7 +3589,7 @@ ${sourceText}`;
     const image=settings.timetablePhoto;
     if(!image){ showToast('Upload a timetable photo first'); return; }
     if(!await window.classmarkGeminiReady()){
-      showToast('Add GEMINI_API_KEY to .env and restart npm run dev to read timetable photos; you can also add the schedule manually');
+      showToast('Gemini is not configured for this website yet. You can still add the schedule manually.');
       document.querySelector('#aiGroup details').open=true; document.getElementById('aiGroup').scrollIntoView({behavior:'smooth',block:'center'}); return;
     }
     showToast('Reading timetable photo…');

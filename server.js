@@ -28,6 +28,9 @@ function loadEnvFile() {
 
 loadEnvFile();
 
+const { verifyFirebaseIdToken } = require('./lib/firebase-token');
+const { generateGemini } = require('./lib/gemini-proxy');
+
 function sendJson(res, status, body) {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
@@ -67,45 +70,19 @@ const mimeTypes = {
 };
 
 async function handleGenerate(req, res) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return sendJson(res, 503, { error: 'Gemini key is not configured. Add GEMINI_API_KEY to .env and restart npm run dev.' });
+  const match = String(req.headers.authorization || '').match(/^Bearer\s+(.+)$/i);
+  if (!match) return sendJson(res, 401, { error: 'Sign in to use Gemini features.' });
+  try { await verifyFirebaseIdToken(match[1]); }
+  catch (error) {
+    if (error.code === 'CERTS_UNAVAILABLE') return sendJson(res, 503, { error: error.message });
+    return sendJson(res, 401, { error: 'Your sign-in expired. Sign in again and retry.' });
+  }
 
   let input;
   try { input = await readJson(req); }
   catch (err) { return sendJson(res, err.status || 400, { error: err.message || 'Could not read request' }); }
-  if (!Array.isArray(input.parts) || !input.parts.length) return sendJson(res, 400, { error: 'Gemini request is missing content.' });
-  const model = typeof input.model === 'string' && /^gemini-[A-Za-z0-9.-]{1,80}$/.test(input.model)
-    ? input.model : (process.env.GEMINI_MODEL || DEFAULT_MODEL);
-  const generationConfig = { temperature: 0 };
-  if (input.schema && typeof input.schema === 'object') {
-    generationConfig.responseMimeType = 'application/json';
-    generationConfig.responseSchema = input.schema;
-  }
-
-  let upstream;
-  try {
-    upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-      body: JSON.stringify({ contents: [{ role: 'user', parts: input.parts }], generationConfig }),
-      signal: AbortSignal.timeout(120000),
-    });
-  } catch {
-    return sendJson(res, 502, { error: 'Could not reach Gemini. Check your internet connection and try again.' });
-  }
-
-  let payload;
-  try { payload = await upstream.json(); }
-  catch { return sendJson(res, 502, { error: 'Gemini returned an unreadable response.' }); }
-  if (!upstream.ok) {
-    const error = payload && payload.error;
-    const message = typeof error?.message === 'string' ? error.message.slice(0, 240) : `Gemini request failed (${upstream.status}).`;
-    return sendJson(res, upstream.status, { error: message });
-  }
-  const parts = payload.candidates?.[0]?.content?.parts;
-  const text = Array.isArray(parts) ? parts.map(part => part.text || '').join('') : '';
-  if (!text) return sendJson(res, 502, { error: 'Gemini returned no text. Try the request again.' });
-  return sendJson(res, 200, { text });
+  try { return sendJson(res, 200, await generateGemini(input)); }
+  catch (error) { return sendJson(res, error.status || 500, { error: error.message || 'Gemini request failed.' }); }
 }
 
 const server = http.createServer(async (req, res) => {

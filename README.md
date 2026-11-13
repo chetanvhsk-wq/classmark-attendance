@@ -77,13 +77,22 @@ Authentication → Settings → Authorized domains before using sign-in on a hos
 local testing, `localhost` must be listed there; opening `www/index.html` directly with `file://`
 will not pass Firebase's authorized-domain check.
 
+### Host on Vercel
+
+The Vercel project uses the repository root, runs `npm run vendor`, and publishes `www/`. Gemini
+requests run through authenticated Node.js functions under `api/`; they require a Firebase sign-in
+and read `GEMINI_API_KEY` from the Vercel Production/Preview environment. Add the deployed
+`*.vercel.app` hostname to Firebase Authentication → Settings → Authorized domains before using
+sign-in on the hosted site. Never add the Gemini key to a `NEXT_PUBLIC_` variable or client file.
+
 ## Data and privacy
 
 - Attendance, imported course totals, dated marks, weekly timetable, and selected preferences
   sync to the `attended-9480d` Firestore database. Firestore rules restrict each account to its
   own workspace. Existing local data is merged when the account first signs in.
-- Gemini API keys are read by the local Node server from `.env`; they are never sent to the browser
-  or synced to Firestore. Timetable photos and wallpaper images remain on-device.
+- Gemini API keys are read by the local Node server from `.env` and by Vercel Functions from the
+  server-side environment; they are never sent to the browser or synced to Firestore. Timetable
+  photos and wallpaper images remain on-device.
   The Firebase web configuration includes a public Firebase API key; it is not a Gemini key or a
   password. Do not put private Gemini keys in source files.
 - The app does not send analytics. Google Fonts is optional and falls back to system fonts

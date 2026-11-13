@@ -9,4 +9,5 @@ www/vendor/
 .DS_Store
 .idea/
 .gradle/
+.vercel/
 *.log
