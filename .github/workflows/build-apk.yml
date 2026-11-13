@@ -28,17 +28,21 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Install JS dependencies (also vendors jsPDF/SheetJS)
         run: npm ci
 
       - name: Install Pillow
-        run: python3 -m pip install --disable-pip-version-check pillow==10.4.0
+        run: python -m pip install --disable-pip-version-check pillow==10.4.0
 
       - name: Add Android platform
         run: npx cap add android
 
       - name: Apply native patches (widget, permissions, icon)
-        run: python3 scripts/patch_android.py
+        run: python scripts/patch_android.py
 
       - name: Sync web assets
         run: npx cap sync android
