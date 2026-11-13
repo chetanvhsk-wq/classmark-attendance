@@ -1,27 +1,54 @@
 # Classmark
 
 A local-first attendance tracker for students, packaged as a PWA and an Android app with
-[Capacitor](https://capacitorjs.com/). Optional Firebase sign-in and cloud sync let you use the
-same account on more than one device. It answers one question well: **how many classes can I
+[Capacitor](https://capacitorjs.com/). It answers one question well: **how many classes can I
 skip, or how many do I need to attend, to stay above my target?**
 
-Sign-in is required to open the app so each workspace is tied to a Firebase account. There is no
-analytics.
+---
+
+## Origin
+
+Classmark started as a fork of [Akshays-14/attendance-system-android](https://github.com/Akshays-14/attendance-system-android),
+a solid student attendance tracker built by Akshay S and Bezaleel Paul.
+I want to be clear about that — their original project laid the foundation.
+
+[![GitHub](https://img.shields.io/badge/Akshay%20S-181717?style=flat&logo=github&logoColor=white)](https://github.com/Akshays-14) [![GitHub](https://img.shields.io/badge/Bezaleel%20Paul-181717?style=flat&logo=github&logoColor=white)](https://github.com/BezaleelPaul)
+
+That said, the work I put in goes well beyond a surface-level fork. The original was a
+purely local, single-device app with no authentication layer. I rebuilt the data model, gutted
+third-party integrations that were visibly slowing both the web app and the Android build,
+and introduced a full Firebase backend that ties each user to a persistent account. Here is
+what changed in practice:
+
+### What I overhauled
+
+| Area | Original | Classmark |
+|---|---|---|
+| **Data storage** | `localStorage` only, one device | Firestore cloud sync — same data on every device you sign in to |
+| **Authentication** | None; no login, no account | Firebase Auth: email/password, Google, and phone sign-in |
+| **Performance** | Third-party widgets and scripts loaded at runtime, noticeable lag | Stripped bloat; all export libs (jsPDF, SheetJS) and the Firebase SDK are vendored locally at install time, never fetched from a CDN |
+| **Hosting** | Static file server | Vercel deployment with server-side Node functions so the Gemini API key is never exposed to the browser |
+| **AI features** | — | Optional Gemini integration for timetable parsing (key kept server-side) |
+| **Security** | No rules; all data public | Per-user Firestore security rules; each account can only access its own workspace |
+
+---
 
 ## Features
 
 - Per-subject attendance with a configurable target percentage.
-- "Can skip / must attend" math shown front and center.
+- **"Can skip / must attend" math shown front and center.**
 - Swipe a subject card left to mark present, right to mark absent; buttons work too.
 - Backfill past dates and edit/remove individual marks.
 - Stats: trend graph, 84-day heatmap, weekly recap with a shareable image, day log, reordering.
 - Reminders via Android Local Notifications (or Web Notifications in the browser).
 - Native Android home-screen widget (overall % + up to 4 subjects).
-- Export/import JSON, CSV, PDF, and Excel. On Android these are written to app storage and
-  opened through the system share sheet; on the web they download normally.
+- Export/import JSON, CSV, PDF, and Excel. On Android these go through the system share sheet;
+  on the web they download normally.
 - Light/dark themes with multiple UI styles and accent colors.
 - Optional email/password, Google, and phone sign-in with Firebase Authentication.
 - Owner-protected Firestore sync for attendance, course totals, timetable, and preferences.
+
+---
 
 ## Install the Android APK
 
@@ -37,11 +64,13 @@ The workflow runs automatically on every push. You can also trigger it manually 
 
 The APK is signed with the debug keystore committed at `keystore/debug.keystore` (alias
 `androiddebugkey`, password `android`). This makes every CI build use the **same** signing key,
-so new debug APKs install over old ones. It is a debug key for personal use only - replace it
+so new debug APKs install over old ones. It is a debug key for personal use only — replace it
 with your own private release keystore before publishing anywhere.
 
-If you lose local data: the app stores data in the WebView's local storage. Export a JSON
-backup before uninstalling. Uninstalling always deletes app data.
+> **If you lose local data:** the app stores data in the WebView's local storage.
+> Export a JSON backup before uninstalling. Uninstalling always deletes app data.
+
+---
 
 ## Build locally
 
@@ -58,58 +87,68 @@ cd android && ./gradlew assembleDebug
 
 The APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`.
 
-To preview the web app, start the local server (Firebase Auth and the private Gemini proxy need localhost):
+To preview the web app, start the local server (Firebase Auth and the private Gemini proxy
+require `localhost`):
 
 ```bash
 npm run dev
 ```
 
-Then open `http://localhost:8000`. To enable Gemini features, add your key to the root `.env` file:
+Then open `http://localhost:8000`. To enable Gemini features, add your key to the root `.env`
+file:
 
 ```env
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
-Save `.env` and restart `npm run dev`. The local server sends Gemini requests to Google without
-exposing the key to browser JavaScript. The `.env` file is ignored by Git. A static Python server
-does not provide this private-key proxy. Add the deployed website hostname under Firebase
-Authentication → Settings → Authorized domains before using sign-in on a hosted domain. For
-local testing, `localhost` must be listed there; opening `www/index.html` directly with `file://`
-will not pass Firebase's authorized-domain check.
+Save `.env` and restart `npm run dev`. The local server forwards Gemini requests to Google
+without exposing the key to browser JavaScript. The `.env` file is ignored by Git.
+
+Add the deployed website hostname under **Firebase Authentication → Settings → Authorized
+domains** before using sign-in on a hosted domain. For local testing, `localhost` must be listed
+there; opening `www/index.html` directly with `file://` will not pass Firebase's
+authorized-domain check.
 
 ### Host on Vercel
 
-The Vercel project uses the repository root, runs `npm run vendor`, and publishes `www/`. Gemini
-requests run through authenticated Node.js functions under `api/`; they require a Firebase sign-in
-and read `GEMINI_API_KEY` from the Vercel Production/Preview environment. Add the deployed
-`*.vercel.app` hostname to Firebase Authentication → Settings → Authorized domains before using
-sign-in on the hosted site. Never add the Gemini key to a `NEXT_PUBLIC_` variable or client file.
+The Vercel project uses the repository root, runs `npm run vendor`, and publishes `www/`.
+Gemini requests run through authenticated Node.js functions under `api/`; they require a
+Firebase sign-in and read `GEMINI_API_KEY` from the Vercel Production/Preview environment.
+Add the deployed `*.vercel.app` hostname to Firebase Authentication → Settings → Authorized
+domains. **Never** add the Gemini key to a `NEXT_PUBLIC_` variable or any client-side file.
+
+---
 
 ## Data and privacy
 
 - Attendance, imported course totals, dated marks, weekly timetable, and selected preferences
-  sync to the `attended-9480d` Firestore database. Firestore rules restrict each account to its
-  own workspace. Existing local data is merged when the account first signs in.
-- Gemini API keys are read by the local Node server from `.env` and by Vercel Functions from the
-  server-side environment; they are never sent to the browser or synced to Firestore. Timetable
-  photos and wallpaper images remain on-device.
-  The Firebase web configuration includes a public Firebase API key; it is not a Gemini key or a
-  password. Do not put private Gemini keys in source files.
+  sync to Firestore. Firestore rules restrict each account to its own workspace. Existing local
+  data is merged when you first sign in.
+- Gemini API keys are read by the local Node server from `.env` and by Vercel Functions from
+  the server-side environment; they are never sent to the browser or synced to Firestore.
+  Timetable photos and wallpaper images remain on-device.
+- The Firebase web configuration includes a public Firebase API key; it is not a Gemini key
+  or a password. Do not put private Gemini keys in source files.
 - The app does not send analytics. Google Fonts is optional and falls back to system fonts
   offline. Export libraries (jsPDF, SheetJS) and the Firebase SDK bundle are generated into
-  `www/vendor` during installation.
+  `www/vendor` during installation and are never fetched from a CDN at runtime.
 - Backups are user-initiated files. Treat an exported JSON backup as personal data.
+
+---
 
 ## Known limitations
 
 - The APK is a debug build, not Play Store-signed or Play Store-ready.
-- Reminder delivery depends on Android/OEM battery management. On aggressive OEMs (for
-  example OPPO/Realme), set battery usage to **Unrestricted** and allow auto-launch.
+- Reminder delivery depends on Android/OEM battery management. On aggressive OEMs (e.g.
+  OPPO/Realme), set battery usage to **Unrestricted** and allow auto-launch.
 - Reminders are scheduled for a rolling 14-day window when the app runs. Reopen the app
-  periodically to replenish the window. A force-stop or reboot can affect pending deliveries
-- The launcher controls widget refresh cadence; the widget also refreshes when the app writes data.
+  periodically to replenish the window. A force-stop or reboot can affect pending deliveries.
+- The launcher controls widget refresh cadence; the widget also refreshes when the app writes
+  data.
 - The UI is one large `www/index.html` file. It works, but it is the main thing to refactor if
   you want to contribute substantially.
+
+---
 
 ## Project layout
 
@@ -124,13 +163,18 @@ scripts/patch_android.py   injects widget, permissions, and icons after `cap add
 scripts/vendor_libs.js      copies and bundles browser libraries into www/vendor
 keystore/debug.keystore     stable debug signing key (personal use only)
 .github/workflows/    CI that builds the debug APK
+api/                  Vercel serverless functions (Gemini proxy)
 ```
+
+---
 
 ## Contributing
 
 Issues and pull requests are welcome. Keep changes focused, test on a real Android device when
 touching the native widget or notifications, and export a backup before testing import/export.
 
+---
+
 ## License
 
-MIT - see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
