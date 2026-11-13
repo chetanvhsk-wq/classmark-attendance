@@ -1,0 +1,6 @@
+{
+  "appId": "com.attendance.app",
+  "appName": "Classmark",
+  "webDir": "www",
+  "android": { "backgroundColor": "#0c0d10" }
+}

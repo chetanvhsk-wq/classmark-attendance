@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Assumed data model: users/{uid}/sync/workspace
+    // Required fields: schemaVersion (integer 1), state (map), settings (map),
+    // updatedAt (timestamp written by Firebase serverTimestamp()).
+    // state.subjects is a list (max 100) of objects with: id (string, max 64),
+    // name (string, max 120), code (string, max 40), target (integer 1-99),
+    // color (hex string), records (date-keyed map of present/absent arrays),
+    // basePresent (nonnegative integer), and baseTotal (integer >= basePresent).
+    // settings contains only UI preferences, reminder settings and a weekly
+    // timetable list (max 200). Gemini API keys and image data are excluded.
+    function signedInAs(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function validWorkspace() {
+      return request.resource.data.keys().hasAll(['schemaVersion', 'state', 'settings', 'updatedAt'])
+        && request.resource.data.keys().hasOnly(['schemaVersion', 'state', 'settings', 'updatedAt'])
+        && request.resource.data.schemaVersion == 1
+        && request.resource.data.state is map
+        && request.resource.data.state.keys().hasOnly(['subjects'])
+        && request.resource.data.state.subjects is list
+        && request.resource.data.state.subjects.size() <= 100
+        && request.resource.data.settings is map
+        && request.resource.data.settings.keys().hasAll(['weeklyTimetable'])
+        && request.resource.data.settings.keys().hasOnly([
+          'ui', 'skeuTone', 'glass', 'colorMode', 'accent', 'customColor',
+          'fontStyle', 'wallpaperOpacity', 'reminderEnabled', 'reminderTime',
+          'reminderDefaultsV2', 'weeklyTimetable'
+        ])
+        && request.resource.data.settings.weeklyTimetable is list
+        && request.resource.data.settings.weeklyTimetable.size() <= 200
+        && request.resource.data.settings.reminderEnabled is bool
+        && request.resource.data.settings.reminderTime is string
+        && request.resource.data.settings.reminderTime.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$')
+        && request.resource.data.updatedAt is timestamp;
+    }
+
+    match /users/{uid}/sync/{documentId} {
+      allow read, delete: if signedInAs(uid) && documentId == 'workspace';
+      allow create, update: if signedInAs(uid)
+        && documentId == 'workspace'
+        && validWorkspace();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

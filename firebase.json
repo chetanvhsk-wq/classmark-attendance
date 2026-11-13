@@ -1,0 +1,9 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json",
+    "edition": "enterprise",
+    "database": "classmark-data",
+    "location": "asia-south1"
+  }
+}
