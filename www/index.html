@@ -759,12 +759,12 @@ select{ width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,
 .onb-card h2{ font-size:20px; margin:0 0 10px; font-weight:800; }
 .onb-step{ text-align:left; display:flex; gap:12px; align-items:flex-start; margin:14px 0; font-size:13.5px; opacity:0.8; line-height:1.4; }
 .onb-step .oi2{ font-size:18px; }
-/* Classmark identity: a compact check badge built from the existing coral accent. */
-#view-home h1{display:flex;align-items:center;gap:9px;}
+/* Use the supplied Classmark app mark in the signed-in app header. */
+#view-home h1{display:flex;align-items:center;gap:10px;}
 #view-home h1::before{
-  content:'✓';width:31px;height:31px;display:inline-grid;place-items:center;flex:0 0 31px;
-  border-radius:9px;background:rgb(var(--accent));color:#241216;font-size:17px;font-weight:900;
-  letter-spacing:0;box-shadow:0 3px 10px rgba(var(--accent),.18);
+  content:'';width:38px;height:38px;display:inline-block;flex:0 0 38px;
+  border-radius:10px;background:url('icon-192.png') center/contain no-repeat;
+  box-shadow:none;letter-spacing:0;
 }
 /* ---- Finishing touches: preserve the original glass-and-coral visual language ---- */
 /* Keep the existing colors, layout, and style choices; improve consistency and interaction clarity. */
@@ -1375,12 +1375,55 @@ body.ui-skeu #styleRow .style-chip.active,body.ui-skeu #fontStyleRow .style-chip
   border-color:rgba(255,255,255,.22) !important;color:#fff !important;
   box-shadow:inset 1px 1px 2px rgba(255,255,255,.22),3px 3px 7px rgba(0,0,0,.18) !important;
 }
+
+/* Clean, consistent sign-in surface. Keep it dark and readable regardless of app theme. */
+#authGate{background:radial-gradient(ellipse at 50% 0%,rgba(var(--accent),.14),transparent 48%),#0c0d10 !important;color:#f5f7fb !important;}
+#authGate .auth-gate-brand{gap:11px;color:#f7f8fb;font-size:22px;margin-bottom:30px;}
+#authGate .auth-gate-brand-mark{width:44px;height:44px;border-radius:13px;background:transparent;overflow:hidden;}
+#authGate .auth-gate-brand-mark img{display:block;width:100%;height:100%;object-fit:contain;border-radius:inherit;}
+#authGate .auth-gate-heading h1{color:#f7f8fb !important;font-size:clamp(30px,7vw,42px);letter-spacing:-.045em;}
+#authGate .auth-gate-heading p{color:rgba(235,240,248,.68) !important;}
+#authGate .auth-gate-inner{width:min(100%,470px);}
+#authGate .settings-block{
+  padding:24px !important;border-radius:24px !important;
+  background:rgba(20,24,32,.82) !important;border:1px solid rgba(255,255,255,.12) !important;
+  box-shadow:0 24px 70px rgba(0,0,0,.32) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.2) !important;
+  backdrop-filter:blur(24px) saturate(1.2) !important;
+}
+#authGate .settings-block h3{color:#f5f7fb !important;}
+#authGate .settings-block .h3-sub,#authGate .auth-field-label{color:rgba(235,240,248,.68) !important;}
+#authGate .cloud-auth-state{color:rgba(235,240,248,.72);}
+#authGate .cloud-auth-form input,#authGate .phone-auth-fields input{
+  box-shadow:none !important;text-shadow:none !important;
+  border:1px solid rgba(255,255,255,.14) !important;border-radius:12px !important;
+  background:rgba(8,12,20,.68) !important;color:#f8fafc !important;
+}
+#authGate .cloud-auth-form input::placeholder,#authGate .phone-auth-fields input::placeholder{color:rgba(226,232,242,.46) !important;}
+#authGate .cloud-auth-form input:focus,#authGate .phone-auth-fields input:focus{
+  border-color:rgba(var(--accent),.68) !important;box-shadow:0 0 0 3px rgba(var(--accent),.14) !important;
+}
+#authGate .cloud-auth-form .util-btn,#authGate .phone-auth-fields .util-btn{
+  box-shadow:none !important;text-shadow:none !important;
+  background:rgba(255,255,255,.075) !important;border:1px solid rgba(255,255,255,.13) !important;
+  color:#f8fafc !important;border-radius:12px !important;
+}
+#authGate .cloud-auth-form .util-btn:hover,#authGate .phone-auth-fields .util-btn:hover{background:rgba(255,255,255,.12) !important;}
+#authGate .phone-auth-details{border-top-color:rgba(255,255,255,.12);}
+#authGate .phone-auth-details summary{color:rgba(245,247,251,.82);}
+#authGate .auth-gate-foot{color:rgba(235,240,248,.48);}
+#authGate .auth-gate-local{display:none !important;}
+@media(max-width:520px){
+  #authGate{padding:24px 14px calc(24px + env(safe-area-inset-bottom,0px));}
+  #authGate .settings-block{padding:20px !important;}
+  #authGate .auth-gate-brand{margin-bottom:24px;}
+}
 </style>
 </head>
 <body>
 <div class="auth-gate open" id="authGate" role="dialog" aria-modal="true" aria-labelledby="authGateTitle" tabindex="-1">
   <div class="auth-gate-inner">
-    <div class="auth-gate-brand"><span class="auth-gate-brand-mark">C</span>Classmark</div>
+    <div class="auth-gate-brand"><span class="auth-gate-brand-mark"><img src="icon-192.png" alt="" aria-hidden="true"></span>Classmark</div>
     <div class="auth-gate-heading">
       <div class="eyebrow">Attendance, together</div>
       <h1 id="authGateTitle">Opening your workspace</h1>
@@ -1390,7 +1433,7 @@ body.ui-skeu #styleRow .style-chip.active,body.ui-skeu #fontStyleRow .style-chip
     <div id="authGateAccountMount"></div>
     <div class="auth-gate-error" id="authGateError" aria-live="polite"></div>
     <div class="auth-gate-foot">Your attendance is private to your signed-in account.</div>
-    <p class="auth-gate-local">Local preview? Open <a href="http://localhost:8000/">localhost:8000</a></p>
+    
   </div>
 </div>
 <div id="wallpaper"></div>
