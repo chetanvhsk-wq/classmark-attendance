@@ -1342,6 +1342,39 @@ body.ui-matte .navbar,body.ui-normal .navbar,body.ui-skeu .navbar{
   background:transparent !important;background-color:transparent !important;box-shadow:none !important;
   -webkit-backdrop-filter:none !important;backdrop-filter:none !important;
 }
+
+/* Make the selected interface style obvious in the picker and preserve its own surface language. */
+#styleRow .style-chip.active,#fontStyleRow .style-chip.active{
+  position:relative;
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(var(--accent),.18);
+}
+body.ui-glass #styleRow .style-chip.active,body.ui-glass #fontStyleRow .style-chip.active,
+body.ui-glass .mode-chip.active{
+  background:linear-gradient(145deg,rgba(var(--accent),.24),rgba(var(--accent),.11)) !important;
+  border-color:rgba(var(--accent),.56) !important;
+  color:rgb(var(--accent)) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.48),0 4px 14px rgba(var(--accent),.16) !important;
+}
+body.ui-glass.tone-light #styleRow .style-chip.active,body.ui-glass.tone-light #fontStyleRow .style-chip.active,
+body.ui-glass.tone-light .mode-chip.active{
+  background:linear-gradient(145deg,rgba(var(--accent),.19),rgba(var(--accent),.08)) !important;
+}
+body.ui-matte #styleRow .style-chip.active,body.ui-matte #fontStyleRow .style-chip.active,
+body.ui-matte .mode-chip.active{
+  background:rgba(var(--accent),.14) !important;border-color:rgba(var(--accent),.42) !important;
+  color:rgb(var(--accent)) !important;box-shadow:none !important;
+}
+body.ui-normal #styleRow .style-chip.active,body.ui-normal #fontStyleRow .style-chip.active,
+body.ui-normal .mode-chip.active{
+  background:rgb(var(--accent)) !important;border-color:rgb(var(--accent)) !important;
+  color:#fff !important;box-shadow:none !important;
+}
+body.ui-skeu #styleRow .style-chip.active,body.ui-skeu #fontStyleRow .style-chip.active{
+  background:linear-gradient(145deg,rgba(var(--accent),.94),rgba(var(--accent),.74)) !important;
+  border-color:rgba(255,255,255,.22) !important;color:#fff !important;
+  box-shadow:inset 1px 1px 2px rgba(255,255,255,.22),3px 3px 7px rgba(0,0,0,.18) !important;
+}
 </style>
 </head>
 <body>
@@ -1350,10 +1383,10 @@ body.ui-matte .navbar,body.ui-normal .navbar,body.ui-skeu .navbar{
     <div class="auth-gate-brand"><span class="auth-gate-brand-mark">C</span>Classmark</div>
     <div class="auth-gate-heading">
       <div class="eyebrow">Attendance, together</div>
-      <h1 id="authGateTitle">Welcome back</h1>
-      <p>Sign in to open your attendance and keep it synced across your devices.</p>
+      <h1 id="authGateTitle">Opening your workspace</h1>
+      <p id="authGateDescription">Restoring your account and attendance sync…</p>
     </div>
-    <div class="auth-gate-wait" id="authGateWait">Checking your account…</div>
+    <div class="auth-gate-wait" id="authGateWait">Connecting securely…</div>
     <div id="authGateAccountMount"></div>
     <div class="auth-gate-error" id="authGateError" aria-live="polite"></div>
     <div class="auth-gate-foot">Your attendance is private to your signed-in account.</div>
@@ -4120,6 +4153,8 @@ window.setClassmarkAuthGate = mode=>{
   const group=document.getElementById('accountGroup');
   const wait=document.getElementById('authGateWait');
   const error=document.getElementById('authGateError');
+  const title=document.getElementById('authGateTitle');
+  const description=document.getElementById('authGateDescription');
   const cardTitle=document.getElementById('cloudCardTitle');
   const help=document.getElementById('cloudSyncHelp');
   if(!gate||!group) return;
@@ -4138,11 +4173,15 @@ window.setClassmarkAuthGate = mode=>{
   document.body.style.overflow='hidden';
   document.querySelectorAll('.app,.navbar,.fab').forEach(el=>{ el.inert=true; });
   if(mode==='loading'){
-    if(wait){ wait.style.display='block'; wait.textContent='Checking your account…'; }
+    if(title) title.textContent='Opening your workspace';
+    if(description) description.textContent='Restoring your account and attendance sync…';
+    if(wait){ wait.style.display='block'; wait.textContent='Connecting securely…'; }
     return;
   }
   if(mount) mount.appendChild(group);
   if(wait) wait.style.display='none';
+  if(title) title.textContent='Welcome back';
+  if(description) description.textContent='Sign in to open your attendance and keep it synced across your devices.';
   if(cardTitle) cardTitle.textContent='Sign in to Classmark';
   if(help) help.textContent='Sign in or create an account to access your attendance and sync it across devices.';
   if(error) error.textContent='';
