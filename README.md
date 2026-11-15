@@ -6,6 +6,12 @@ skip, or how many do I need to attend, to stay above my target?**
 
 ---
 
+## Screenshot
+
+![Classmark glass navigation screenshot](docs/screenshots/glass-navigation.png)
+
+*Glass navigation capture shared during the interface refinement.*
+
 ## Origin
 
 Classmark started as a fork of [Akshays-14/attendance-system-android](https://github.com/Akshays-14/attendance-system-android),
