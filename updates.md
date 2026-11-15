@@ -35,6 +35,7 @@ This file tracks the major features and improvements added to Classmark.
 - Refined Glass mode with translucent blurred surfaces and a transparent page/navigation background.
 - Added the persistent liquid-glass navigation pill with an animated active tab.
 - Improved selected-theme feedback and the account-loading screen.
+- Made theme and font choices native keyboard-accessible buttons with previews for each style.
 - Simplified the sign-in page with readable dark-glass styling and reduced field/button glow.
 - Added the supplied Classmark app icon to the sign-in brand and signed-in Home header.
 - Removed the Giphy section and decorative glyph treatment.
