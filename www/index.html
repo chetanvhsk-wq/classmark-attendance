@@ -1418,6 +1418,37 @@ body.ui-skeu #styleRow .style-chip.active,body.ui-skeu #fontStyleRow .style-chip
   #authGate .settings-block{padding:20px !important;}
   #authGate .auth-gate-brand{margin-bottom:24px;}
 }
+
+/* Theme and font pickers preview each choice directly and remain usable by keyboard. */
+.style-chip{
+  appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;justify-content:center;
+  gap:8px;line-height:1;user-select:none;
+}
+#styleRow .style-chip[data-ui]::before{
+  content:"";width:10px;height:10px;flex:0 0 10px;border-radius:50%;
+  border:1px solid currentColor;opacity:.78;
+}
+#styleRow .style-chip[data-ui="skeu"]::before{
+  border-color:rgba(var(--text),.2);background:linear-gradient(145deg,rgba(255,255,255,.6),rgba(var(--accent),.4));
+  box-shadow:2px 2px 4px rgba(0,0,0,.18),-1px -1px 3px rgba(255,255,255,.48);
+}
+#styleRow .style-chip[data-ui="glass"]::before{
+  border-color:rgba(var(--text),.4);background:linear-gradient(135deg,rgba(255,255,255,.95),rgba(125,205,239,.26));
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.85),0 0 5px rgba(115,198,232,.28);
+}
+#styleRow .style-chip[data-ui="matte"]::before{
+  border-radius:3px;border:0;background:rgb(var(--accent));opacity:.58;
+}
+#styleRow .style-chip[data-ui="normal"]::before{
+  border-radius:2px;background:transparent;box-shadow:none;
+}
+#fontStyleRow [data-font="default"]{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;}
+#fontStyleRow [data-font="rounded"]{font-family:"Quicksand",-apple-system,sans-serif !important;}
+#fontStyleRow [data-font="handwritten"]{font-family:"Patrick Hand",-apple-system,sans-serif !important;}
+#fontStyleRow [data-font="serif"]{font-family:"Lora",Georgia,serif !important;}
+#fontStyleRow [data-font="squared"]{font-family:"Space Mono",monospace !important;}
+.style-chip:focus-visible{outline:2px solid rgba(var(--accent),.9);outline-offset:3px;}
+.style-chip[aria-pressed="true"]{font-weight:750;}
 </style>
 </head>
 <body>
@@ -1575,21 +1606,21 @@ body.ui-skeu #styleRow .style-chip.active,body.ui-skeu #fontStyleRow .style-chip
       <div class="card settings-block">
         <h3>Interface style<span class="current-val" id="curUiStyle">Glass</span></h3>
         <div class="style-row" id="styleRow">
-          <div class="style-chip" data-ui="skeu" tabindex="0">Skeuomorphic</div>
-          <div class="style-chip" data-ui="glass" tabindex="0">Glass</div>
-          <div class="style-chip" data-ui="matte" tabindex="0">Matte</div>
-          <div class="style-chip" data-ui="normal" tabindex="0">Normal</div>
+          <button type="button" class="style-chip" data-ui="skeu" aria-pressed="false" title="Raised, tactile surfaces">Skeuomorphic</button>
+          <button type="button" class="style-chip" data-ui="glass" aria-pressed="false" title="Translucent surfaces with blur">Glass</button>
+          <button type="button" class="style-chip" data-ui="matte" aria-pressed="false" title="Quiet solid surfaces">Matte</button>
+          <button type="button" class="style-chip" data-ui="normal" aria-pressed="false" title="Simple flat surfaces">Normal</button>
         </div>
       </div>
 
       <div class="card settings-block" id="fontStyleBlock">
         <h3>Font style<span class="current-val" id="curFontStyle">Default</span></h3>
         <div class="style-row" id="fontStyleRow">
-          <div class="style-chip" data-font="default" tabindex="0">Default</div>
-          <div class="style-chip" data-font="rounded" tabindex="0">Rounded</div>
-          <div class="style-chip" data-font="handwritten" tabindex="0">Handwritten</div>
-          <div class="style-chip" data-font="serif" tabindex="0">Serif</div>
-          <div class="style-chip" data-font="squared" tabindex="0">Squared</div>
+          <button type="button" class="style-chip" data-font="default" aria-pressed="false">Default</button>
+          <button type="button" class="style-chip" data-font="rounded" aria-pressed="false">Rounded</button>
+          <button type="button" class="style-chip" data-font="handwritten" aria-pressed="false">Handwritten</button>
+          <button type="button" class="style-chip" data-font="serif" aria-pressed="false">Serif</button>
+          <button type="button" class="style-chip" data-font="squared" aria-pressed="false">Squared</button>
         </div>
       </div>
 
@@ -2246,7 +2277,11 @@ function bindSpecularToAllCards(){ document.querySelectorAll('.card').forEach(at
 
 function applySettings(){
   document.body.className = 'ui-' + settings.ui + ' tone-' + settings.skeuTone + ' font-' + (settings.fontStyle || 'default');
-  document.querySelectorAll('#fontStyleRow .style-chip').forEach(c=> c.classList.toggle('active', c.dataset.font === (settings.fontStyle || 'default')));
+  document.querySelectorAll('#fontStyleRow .style-chip').forEach(c=>{
+    const selected=c.dataset.font === (settings.fontStyle || 'default');
+    c.classList.toggle('active',selected);
+    c.setAttribute('aria-pressed',String(selected));
+  });
   const fontLabels = { default:'Default', rounded:'Rounded', handwritten:'Handwritten', serif:'Serif', squared:'Squared' };
   document.getElementById('curFontStyle').textContent = fontLabels[settings.fontStyle || 'default'];
   const isSkeu = settings.ui === 'skeu';
@@ -2274,7 +2309,11 @@ function applySettings(){
   if(settings.wallpaper){ document.getElementById('wallpaper').style.backgroundImage = `url(${settings.wallpaper})`; }
   else { document.getElementById('wallpaper').style.backgroundImage = 'none'; }
 
-  document.querySelectorAll('#styleRow .style-chip').forEach(c=> c.classList.toggle('active', c.dataset.ui === settings.ui));
+  document.querySelectorAll('#styleRow .style-chip').forEach(c=>{
+    const selected=c.dataset.ui === settings.ui;
+    c.classList.toggle('active',selected);
+    c.setAttribute('aria-pressed',String(selected));
+  });
   document.querySelectorAll('.mode-chip:not(.tone-chip):not(.reminder-chip)').forEach(c=> c.classList.toggle('active', c.dataset.mode === settings.colorMode));
   document.getElementById('customColorWrap').style.display = settings.colorMode==='custom' ? 'flex' : 'none';
   document.getElementById('accentRow').style.display = settings.colorMode==='preset' ? 'flex' : 'none';
