@@ -2584,75 +2584,108 @@ document.getElementById('exportCsvBtn').onclick = async ()=>{
 document.getElementById('exportPdfBtn').onclick = async ()=>{
   try{
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(16); doc.text('Attendance Report', 14, 16);
-    doc.setFontSize(10); doc.text('Generated ' + todayStr(), 14, 22);
-    let y = 32;
-    doc.setFontSize(11);
-    doc.text('Subject', 14, y); doc.text('Present', 110, y); doc.text('Total', 140, y); doc.text('%', 165, y); doc.text('Target', 180, y);
-    y += 4; doc.setLineWidth(0.2); doc.line(14, y, 196, y); y += 6;
-    state.subjects.forEach(s=>{
+    const doc = new jsPDF({unit:'mm',format:'a4'});
+    const subjects = state.subjects.map(s=>{
       const t = totals(s);
       const pct = t.total ? Math.round((t.present/t.total)*100) : 0;
-      if(y > 280){ doc.addPage(); y = 20; }
-      doc.text(String(s.code ? s.code+' · '+s.name : s.name).slice(0,55), 14, y);
-      doc.text(String(t.present), 110, y);
-      doc.text(String(t.total), 140, y);
-      doc.text(pct + '%', 165, y);
-      doc.text(String(s.target) + '%', 180, y);
-      y += 8;
+      return {s,t,pct,absent:Math.max(0,t.total-t.present)};
     });
-    const baseline=state.subjects.filter(s=>(s.baseTotal||0)>0||(s.basePresent||0)>0);
-    if(baseline.length){
-      y+=8; if(y>250){ doc.addPage(); y=20; }
-      doc.setFontSize(12); doc.text('Imported totals (not date-stamped)',14,y); y+=7; doc.setFontSize(10); doc.text('Subject',14,y); doc.text('Present / Total',150,y); y+=6;
-      baseline.forEach(s=>{ if(y>280){doc.addPage();y=20;} doc.text(String(s.name).slice(0,55),14,y); doc.text(String(s.basePresent||0)+' / '+String(s.baseTotal||0),150,y); y+=7; });
-    }
+    const present = subjects.reduce((n,x)=>n+x.t.present,0);
+    const absent = subjects.reduce((n,x)=>n+x.absent,0);
+    const total = present + absent;
+    const overall = total ? Math.round(present/total*100) : 0;
+    const onTrack = subjects.filter(x=>x.pct >= Number(x.s.target||75)).length;
+    const accent=[255,110,110], ink=[31,41,55], muted=[105,116,137], green=[40,160,92], red=[218,76,76], blue=[91,126,219];
+    const header=(title,subtitle)=>{
+      doc.setFillColor(21,27,38); doc.rect(0,0,210,29,'F');
+      doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.text(title,14,13);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(196,205,219); doc.text(subtitle,14,21);
+      doc.setTextColor(...ink);
+    };
+    const card=(x,y,w,label,value,color)=>{
+      doc.setFillColor(248,249,252); doc.setDrawColor(229,233,241); doc.roundedRect(x,y,w,24,4,4,'FD');
+      doc.setFont('helvetica','bold'); doc.setFontSize(17); doc.setTextColor(...(color||ink)); doc.text(String(value),x+7,y+12);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...muted); doc.text(label,x+7,y+19);
+    };
+    const pie=(cx,cy,r,parts)=>{
+      let angle=-Math.PI/2;
+      parts.forEach(part=>{
+        const end=angle+(total?part.value/total:0)*Math.PI*2;
+        const pts=[[0,0]];
+        for(let i=0;i<=18;i++){const a=angle+(end-angle)*i/18;pts.push([r*Math.cos(a),r*Math.sin(a)]);}
+        doc.setFillColor(...part.color); doc.lines(pts,cx,cy,[1,1],'F',true); angle=end;
+      });
+      doc.setFillColor(255,255,255); doc.circle(cx,cy,r*.44,'F');
+      doc.setTextColor(...ink); doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.text(overall+'%',cx,cy+2,{align:'center'});
+    };
+    const bar=(label,value,y,color)=>{
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...ink);
+      doc.text(String(label).slice(0,29),14,y);
+      doc.setFillColor(232,236,243); doc.roundedRect(76,y-4,92,6,2,2,'F');
+      doc.setFillColor(...color); doc.roundedRect(76,y-4,Math.max(2,92*Math.min(100,value)/100),6,2,2,'F');
+      doc.setFont('helvetica','bold'); doc.text(value+'%',174,y);
+    };
+    header('Classmark attendance','A clear view of your attendance, targets, and next actions · '+todayStr());
+    doc.setTextColor(...ink); doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.text('Your overview',14,42);
+    card(14,48,42,'Overall',overall+'%',overall>=75?green:red);
+    card(60,48,42,'Classes tracked',total,blue);
+    card(106,48,42,'On target',onTrack+'/'+subjects.length,green);
+    card(152,48,44,'Subjects',subjects.length,accent);
+    doc.setFillColor(248,249,252); doc.setDrawColor(229,233,241); doc.roundedRect(14,80,182,70,5,5,'FD');
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...ink); doc.text('Attendance mix',24,91);
+    pie(48,116,22,[{value:present,color:green},{value:absent,color:red}]);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setFillColor(...green); doc.circle(88,108,2,'F'); doc.setTextColor(...muted); doc.text('Present  '+present,94,110);
+    doc.setFillColor(...red); doc.circle(88,121,2,'F'); doc.setTextColor(...muted); doc.text('Absent  '+absent,94,123);
+    doc.setFont('helvetica','bold'); doc.setTextColor(...ink); doc.text('Target insight',130,103);
+    doc.setFont('helvetica','normal'); doc.setTextColor(...muted);
+    doc.text(overall>=75?'You are currently on track.':'Your overall attendance needs attention.',130,111);
+    doc.text(onTrack+' of '+subjects.length+' subjects meet their target.',130,119);
+    doc.setFont('helvetica','bold'); doc.setTextColor(...ink); doc.text('Subject performance',14,163);
+    let y=174;
+    subjects.slice().sort((a,b)=>a.pct-b.pct).forEach(x=>{bar(x.s.name,x.pct,y,x.pct>=Number(x.s.target||75)?green:red);y+=9;});
+    y=Math.max(y+5,subjects.length?y:174);
+    if(y>266){doc.addPage();header('Subject details','Attendance counts and targets');y=44;} else {doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...ink);doc.text('Detailed counts',14,y);y+=8;}
+    doc.setFillColor(240,243,248);doc.rect(14,y-5,182,8,'F');doc.setFontSize(8);doc.setTextColor(...muted);
+    doc.text('Subject',16,y);doc.text('Present',120,y);doc.text('Absent',143,y);doc.text('Total',165,y);doc.text('Target',182,y);
+    y+=9;
+    subjects.forEach(x=>{
+      if(y>280){doc.addPage();header('Subject details','Attendance counts and targets');y=44;}
+      doc.setTextColor(...ink);doc.setFont('helvetica','normal');doc.text(String(x.s.name).slice(0,42),16,y);
+      doc.text(String(x.t.present),122,y);doc.text(String(x.absent),145,y);doc.text(String(x.t.total),167,y);doc.text(String(x.s.target||75)+'%',182,y);y+=7;
+    });
     const schedule=settings.weeklyTimetable||[];
-    if(schedule.length){
-      doc.addPage(); doc.setFontSize(16); doc.text('Weekly Timetable',14,16); doc.setFontSize(10); doc.text('Classmark reminder schedule',14,22);
-      let sy=32; const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-      schedule.slice().sort((a,b)=>Number(a.day)-Number(b.day)).forEach(item=>{
-        if(sy>280){doc.addPage();sy=20;}
-        doc.text(days[Number(item.day)]||'Day',14,sy); doc.text(String(item.subject).slice(0,70),55,sy); sy+=7;
-      });
-    }
-    const history=[];
-    state.subjects.forEach(s=>Object.keys(s.records||{}).sort().forEach(date=>{
-      (s.records[date]||[]).forEach((mark,i)=>history.push({date,subject:s.name,mark:mark==='present'?'Present':'Absent',index:i+1}));
-    }));
-    if(history.length){
-      doc.addPage(); doc.setFontSize(16); doc.text('Daily Attendance Log',14,16); doc.setFontSize(10); doc.text('Each dated mark recorded in Classmark',14,22);
-      let hy=32; doc.setFontSize(10);
-      history.sort((a,b)=>a.date.localeCompare(b.date)||a.subject.localeCompare(b.subject)||a.index-b.index).forEach(row=>{
-        if(hy>280){doc.addPage();hy=20;}
-        doc.text(row.date,14,hy); doc.text(String(row.subject).slice(0,60),52,hy); doc.text(row.mark,170,hy); hy+=7;
-      });
-    }
-    await saveFile(`attend-report-${todayStr()}.pdf`, doc.output('blob'), 'application/pdf');
-    if(!isNativeApp()) showToast('PDF downloaded');
+    if(schedule.length){doc.addPage();header('Weekly timetable','Your class schedule and reminder plan');let sy=44;const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];schedule.slice().sort((a,b)=>Number(a.day)-Number(b.day)).forEach(item=>{if(sy>280){doc.addPage();header('Weekly timetable','Your class schedule and reminder plan');sy=44;}doc.setFillColor(248,249,252);doc.roundedRect(14,sy-5,182,10,3,3,'F');doc.setTextColor(...accent);doc.setFont('helvetica','bold');doc.text(days[Number(item.day)]||'Day',20,sy+1);doc.setTextColor(...ink);doc.setFont('helvetica','normal');doc.text(String(item.subject).slice(0,64),58,sy+1);sy+=14;});}
+    const history=[];state.subjects.forEach(s=>Object.keys(s.records||{}).sort().forEach(date=>(s.records[date]||[]).forEach((mark,i)=>history.push({date,subject:s.name,mark:mark==='present'?'Present':'Absent',index:i+1}))));
+    if(history.length){doc.addPage();header('Daily attendance log','Every dated attendance mark recorded in Classmark');let hy=44;history.sort((a,b)=>a.date.localeCompare(b.date)||a.subject.localeCompare(b.subject)||a.index-b.index).forEach(row=>{if(hy>280){doc.addPage();header('Daily attendance log','Every dated attendance mark recorded in Classmark');hy=44;}doc.setTextColor(...muted);doc.setFontSize(8);doc.text(row.date,16,hy);doc.setTextColor(...ink);doc.text(String(row.subject).slice(0,58),50,hy);doc.setTextColor(...(row.mark==='Present'?green:red));doc.text(row.mark,177,hy);hy+=7;});}
+    const pages=doc.getNumberOfPages();for(let p=1;p<=pages;p++){doc.setPage(p);doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(...muted);doc.text('Classmark · private attendance report',14,291);doc.text('Page '+p+' of '+pages,196,291,{align:'right'});}
+    await saveFile('attend-report-'+todayStr()+'.pdf',doc.output('blob'),'application/pdf');
+    if(!isNativeApp()) showToast('Polished PDF downloaded');
   }catch(err){ alert('Could not generate PDF: ' + (err && err.message ? err.message : err)); }
 };
 document.getElementById('exportXlsxBtn').onclick = async ()=>{
   try{
-    const rows = state.subjects.map(s=>{
-      const t = totals(s);
-      const pct = t.total ? Math.round((t.present/t.total)*100) : 0;
-      return { 'Course Code':s.code||'', Subject:s.name, Present:t.present, Absent:Math.max(0,t.total-t.present), Total:t.total, 'Percentage':pct, 'Target %':s.target, 'Imported Present':s.basePresent||0, 'Imported Sessions':s.baseTotal||0 };
-    });
-    const logRows=[];
-    state.subjects.forEach(s=>Object.keys(s.records||{}).sort().forEach(date=>{
-      (s.records[date]||[]).forEach((mark,index)=>logRows.push({Date:date,'Course Code':s.code||'',Subject:s.name,'Class #':index+1,Attendance:mark==='present'?'Present':'Absent'}));
-    }));
-    const timetableRows=(settings.weeklyTimetable||[]).map(x=>({Day:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][Number(x.day)]||'',Subject:x.subject}));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Overview');
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logRows), 'Daily Log');
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(timetableRows), 'Weekly Timetable');
-    const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    await saveFile(`attend-report-${todayStr()}.xlsx`, new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    if(!isNativeApp()) showToast('Excel file downloaded');
-  }catch(err){ alert('Could not generate Excel file: ' + (err && err.message ? err.message : err)); }
+    const subjects=state.subjects.map(s=>{const t=totals(s);const pct=t.total?Math.round(t.present/t.total*100):0;return {'Course Code':s.code||'',Subject:s.name,Present:t.present,Absent:Math.max(0,t.total-t.present),Total:t.total,'Percentage':pct,'Target %':Number(s.target||75),'Status':pct>=Number(s.target||75)?'On target':'Needs attention'};});
+    const present=subjects.reduce((n,x)=>n+x.Present,0),absent=subjects.reduce((n,x)=>n+x.Absent,0),total=present+absent,overall=total?Math.round(present/total*100):0;
+    const insightRows=[
+      ['CLASSMARK · ATTENDANCE INSIGHTS'],['Generated',todayStr()],[],
+      ['KEY METRICS','VALUE'],['Overall attendance',overall+'%'],['Classes tracked',total],['Subjects on target',subjects.filter(x=>x.Status==='On target').length+' / '+subjects.length],[],
+      ['SUBJECT PERFORMANCE'],['Subject','Present','Absent','Attendance %','Target %','Status','Bar graph'],
+      ...subjects.map(x=>[x.Subject,x.Present,x.Absent,x.Percentage,x['Target %'],x.Status,Array(Math.max(1,Math.round(x.Percentage/5)+1)).join('█')]),
+      [],['ATTENDANCE MIX · PIE CHART DATA'],['Status','Count','Share','Pie share'],['Present',present,total?present/total:0,total?Math.round(present/total*100)+'%':'0%'],['Absent',absent,total?absent/total:0,total?Math.round(absent/total*100)+'%':'0%'],
+      [],['How to read this workbook'],['The Overview sheet contains the full subject table. This Insights sheet adds visual bars and the present/absent pie-chart data for quick review.']
+    ];
+    const logRows=[];state.subjects.forEach(s=>Object.keys(s.records||{}).sort().forEach(date=>(s.records[date]||[]).forEach((mark,index)=>logRows.push({Date:date,'Course Code':s.code||'',Subject:s.name,'Class #':index+1,Attendance:mark==='present'?'Present':'Absent'}))));
+    const timetableRows=(settings.weeklyTimetable||[]).map(x=>({Day:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][Number(x.day)]||'',Subject:x.subject,Time:x.time||''}));
+    const wb=XLSX.utils.book_new();
+    const overview=XLSX.utils.json_to_sheet(subjects);overview['!cols']=[{wch:16},{wch:34},{wch:10},{wch:10},{wch:10},{wch:13},{wch:11},{wch:18}];overview['!autofilter']={ref:'A1:H'+Math.max(1,subjects.length+1)};overview['!freeze']={xSplit:0,ySplit:1};
+    const insights=XLSX.utils.aoa_to_sheet(insightRows);insights['!merges']=[{s:{r:0,c:0},e:{r:0,c:6}},{s:{r:7,c:0},e:{r:7,c:6}},{s:{r:8+subjects.length+2,c:0},e:{r:8+subjects.length+2,c:3}},{s:{r:12+subjects.length,c:0},e:{r:12+subjects.length,c:3}}];insights['!cols']=[{wch:36},{wch:13},{wch:13},{wch:16},{wch:12},{wch:20},{wch:34}];insights['!freeze']={xSplit:0,ySplit:2};
+    const daily=XLSX.utils.json_to_sheet(logRows);daily['!cols']=[{wch:14},{wch:16},{wch:34},{wch:10},{wch:14}];daily['!autofilter']={ref:'A1:E'+Math.max(1,logRows.length+1)};
+    const timetable=XLSX.utils.json_to_sheet(timetableRows);timetable['!cols']=[{wch:14},{wch:34},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,overview,'Overview');XLSX.utils.book_append_sheet(wb,insights,'Insights');XLSX.utils.book_append_sheet(wb,daily,'Daily Log');XLSX.utils.book_append_sheet(wb,timetable,'Weekly Timetable');
+    const buf=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+    await saveFile('attend-report-'+todayStr()+'.xlsx',new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    if(!isNativeApp()) showToast('Excel insights workbook downloaded');
+  }catch(err){alert('Could not generate Excel file: '+(err&&err.message?err.message:err));}
 };
 document.getElementById('importBtn').onclick = ()=> document.getElementById('importInput').click();
 document.getElementById('importInput').onchange = (e)=>{
