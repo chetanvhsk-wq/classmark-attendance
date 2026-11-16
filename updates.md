@@ -39,7 +39,6 @@ This file tracks the major features and improvements added to Classmark.
 - Restored the tactile glass surface system across cards, controls, settings, overlays, and navigation, based on the saved reference deployment.
 - Made theme, appearance, and style-color controls native buttons with persistent pressed states for touch, keyboard, web, and Android use.
 - Reinstated distinct Skeuomorphic, Glass, Matte, and Normal surface treatments so selecting an interface style visibly changes the full application.
-- Added playful tactile feedback across attendance actions, buttons, theme chips, navigation, and the floating action button: raised depth, press compression, and springy release. Existing haptics provide matching vibration feedback on supported phones.
 - Simplified the sign-in page with readable dark-glass styling and reduced field/button glow.
 - Added the supplied Classmark app icon to the sign-in brand and signed-in Home header.
 - Removed the Giphy section and decorative glyph treatment.
