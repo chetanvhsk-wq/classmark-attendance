@@ -26,6 +26,8 @@ This file tracks the major features and improvements added to Classmark.
 - Added Firestore account sync so attendance and timetable data can follow the same signed-in account across devices.
 - Kept Gemini keys, timetable photos, and wallpapers on the device.
 - Added PDF and Excel exports. Excel workbooks include Overview, Daily Log, and Weekly Timetable sheets.
+- Redesigned PDF export page one with summary cards, attendance mix pie chart, subject performance bars, target insights, polished tables, headers, and footers.
+- Added an Excel Insights sheet with key metrics, subject bar visuals, present/absent pie-chart data, filters, frozen headers, and improved column sizing.
 - Added JSON and CSV export, plus data-file import.
 
 ## Interface and visual design
