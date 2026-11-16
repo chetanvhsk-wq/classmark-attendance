@@ -1,183 +1,163 @@
+<div align="center">
+
+<img src="icon.png" alt="Classmark icon" width="96" height="96" />
+
 # Classmark
 
-A local-first attendance tracker for students, packaged as a PWA and an Android app with
-[Capacitor](https://capacitorjs.com/). It answers one question well: **how many classes can I
-skip, or how many do I need to attend, to stay above my target?**
+**A local-first attendance tracker for students — available as a PWA and an Android app.**
+
+It answers one question: *how many classes can I skip, or how many do I need to attend, to stay above my target?*
+
+<br/>
+
+[![Build Android APK](https://github.com/chetanvhsk-wq/classmark-attendance/actions/workflows/build-apk.yml/badge.svg)](https://github.com/chetanvhsk-wq/classmark-attendance/actions)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Platform](https://img.shields.io/badge/platform-Android%20%7C%20Web%20PWA-brightgreen)
+![Firebase](https://img.shields.io/badge/backend-Firebase-orange?logo=firebase&logoColor=white)
+![Vercel](https://img.shields.io/badge/hosted%20on-Vercel-black?logo=vercel&logoColor=white)
+
+</div>
 
 ---
 
 ## Screenshot
 
-![Classmark glass navigation screenshot](docs/screenshots/glass-navigation.png)
+![Classmark glass navigation](docs/screenshots/glass-navigation.png)
 
-*Glass navigation capture shared during the interface refinement.*
+---
 
 ## Origin
 
-Classmark started as a fork of [Akshays-14/attendance-system-android](https://github.com/Akshays-14/attendance-system-android),
-a solid student attendance tracker built by Akshay S and Bezaleel Paul.
-I want to be clear about that — their original project laid the foundation.
+Classmark started as a fork of [Akshays-14/attendance-system-android](https://github.com/Akshays-14/attendance-system-android), a solid student attendance tracker built by **Akshay S** and **Bezaleel Paul**. Their original project laid the foundation.
 
 [![GitHub](https://img.shields.io/badge/Akshay%20S-181717?style=flat&logo=github&logoColor=white)](https://github.com/Akshays-14) [![GitHub](https://img.shields.io/badge/Bezaleel%20Paul-181717?style=flat&logo=github&logoColor=white)](https://github.com/BezaleelPaul)
 
-That said, the work I put in goes well beyond a surface-level fork. The original was a
-purely local, single-device app with no authentication layer. I rebuilt the data model, gutted
-third-party integrations that were visibly slowing both the web app and the Android build,
-and introduced a full Firebase backend that ties each user to a persistent account. Here is
-what changed in practice:
-
-### What I overhauled
+That said, what I built goes well beyond a surface-level fork. The original was a purely local, single-device app with no authentication layer. I rebuilt the data model, stripped third-party integrations that were visibly slowing both the web app and the Android build, and introduced a full Firebase backend that ties each user to a persistent account.
 
 | Area | Original | Classmark |
 |---|---|---|
 | **Data storage** | `localStorage` only, one device | Firestore cloud sync — same data on every device you sign in to |
-| **Authentication** | None; no login, no account | Firebase Auth: email/password, Google, and phone sign-in |
-| **Performance** | Third-party widgets and scripts loaded at runtime, noticeable lag | Stripped bloat; all export libs (jsPDF, SheetJS) and the Firebase SDK are vendored locally at install time, never fetched from a CDN |
-| **Hosting** | Static file server | Vercel deployment with server-side Node functions so the Gemini API key is never exposed to the browser |
-| **AI features** | — | Optional Gemini integration for timetable parsing (key kept server-side) |
-| **Security** | No rules; all data public | Per-user Firestore security rules; each account can only access its own workspace |
+| **Authentication** | None | Firebase Auth — email/password, Google, and phone sign-in |
+| **Performance** | Third-party widgets loaded at runtime, noticeable lag | Stripped CDN bloat; all libs (jsPDF, SheetJS, Firebase SDK) vendored locally at install time |
+| **Hosting** | Static file server | Vercel with server-side Node functions — Gemini API key never touches the browser |
+| **AI features** | — | Optional Gemini integration for timetable parsing |
+| **Security** | No rules; all data public | Per-user Firestore security rules |
 
 ---
 
 ## Features
 
-- Per-subject attendance with a configurable target percentage.
-- **"Can skip / must attend" math shown front and center.**
-- Swipe a subject card left to mark present, right to mark absent; buttons work too.
-- Backfill past dates and edit/remove individual marks.
-- Stats: trend graph, 84-day heatmap, weekly recap with a shareable image, day log, reordering.
-- Reminders via Android Local Notifications (or Web Notifications in the browser).
-- Native Android home-screen widget (overall % + up to 4 subjects).
-- Export/import JSON, CSV, PDF, and Excel. On Android these go through the system share sheet;
-  on the web they download normally.
-- Light/dark themes with multiple UI styles and accent colors.
-- Optional email/password, Google, and phone sign-in with Firebase Authentication.
-- Owner-protected Firestore sync for attendance, course totals, timetable, and preferences.
+- Per-subject attendance with a configurable target percentage
+- **Skip/attend math shown front and center** — always know exactly where you stand
+- Swipe a subject card left to mark present, right to mark absent (buttons work too)
+- Backfill past dates and edit or remove individual marks
+- Stats: trend graph, 84-day heatmap, weekly recap with a shareable image, day log, subject reordering
+- Reminders via Android Local Notifications or Web Notifications in the browser
+- Native Android home-screen widget showing overall % and up to 4 subjects
+- Export/import as JSON, CSV, PDF, and Excel — Android uses the system share sheet, web downloads normally
+- Light/dark themes with multiple UI styles and accent colors
+- Optional Firebase Authentication — email/password, Google, or phone sign-in
+- Owner-protected Firestore sync for attendance, course totals, timetable, and preferences
 
 ---
 
-## Install the Android APK
+## Get the Android APK
 
-1. Open the **Actions** tab and wait for the **Build Android APK** workflow.
-2. Open the latest green run and download the **attendance-apk** artifact.
-3. Unzip it and copy `app-debug.apk` to your phone, then install it (allow "Install unknown
-   apps" when asked).
+1. Go to the **Actions** tab → open the latest green **Build Android APK** run
+2. Download the **attendance-apk** artifact and unzip it
+3. Copy `app-debug.apk` to your phone and install it (allow "Install from unknown sources" when prompted)
 
-The workflow runs automatically on every push. You can also trigger it manually with
-**Run workflow**.
+The workflow runs on every push. You can also trigger it manually via **Run workflow**.
 
-### App updates and signing
+> **Note on signing:** The APK is signed with the debug keystore at `keystore/debug.keystore` (alias `androiddebugkey`, password `android`). Every CI build uses the same key, so new APKs install cleanly over old ones. Replace it with your own release keystore before publishing anywhere.
 
-The APK is signed with the debug keystore committed at `keystore/debug.keystore` (alias
-`androiddebugkey`, password `android`). This makes every CI build use the **same** signing key,
-so new debug APKs install over old ones. It is a debug key for personal use only — replace it
-with your own private release keystore before publishing anywhere.
-
-> **If you lose local data:** the app stores data in the WebView's local storage.
-> Export a JSON backup before uninstalling. Uninstalling always deletes app data.
+> **Local data heads-up:** The app stores data in the WebView's local storage. Export a JSON backup before uninstalling — uninstalling always wipes app data.
 
 ---
 
-## Build locally
+## Run Locally
 
-Requirements: Node 20+, JDK 17, Android SDK with a platform and build-tools, and Python 3
-with Pillow.
+**Requirements:** Node 20+, JDK 17, Android SDK (platform + build-tools), Python 3 + Pillow.
+
+### Web preview
 
 ```bash
-npm ci                    # installs deps + vendors jsPDF, SheetJS, and Firebase into www/vendor
+npm ci
+npm run dev
+```
+
+Open `http://localhost:8000`. To enable Gemini features, create a `.env` at the root:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+Restart `npm run dev`. The local server proxies Gemini requests server-side — your key never reaches the browser. `.env` is gitignored.
+
+> Add `localhost` to **Firebase Authentication → Settings → Authorized domains** before testing sign-in locally. Opening `www/index.html` via `file://` won't pass Firebase's authorized-domain check.
+
+### Build the Android APK
+
+```bash
+npm ci
 npx cap add android
 python3 scripts/patch_android.py
 npx cap sync android
 cd android && ./gradlew assembleDebug
 ```
 
-The APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`.
+Output: `android/app/build/outputs/apk/debug/app-debug.apk`
 
-To preview the web app, start the local server (Firebase Auth and the private Gemini proxy
-require `localhost`):
+### Deploy to Vercel
 
-```bash
-npm run dev
-```
+Point Vercel at the repository root. It runs `npm run vendor` and publishes `www/`. Gemini proxying runs through the serverless functions in `api/` — they read `GEMINI_API_KEY` from your Vercel Production/Preview environment.
 
-Then open `http://localhost:8000`. To enable Gemini features, add your key to the root `.env`
-file:
-
-```env
-GEMINI_API_KEY=your_gemini_api_key
-```
-
-Save `.env` and restart `npm run dev`. The local server forwards Gemini requests to Google
-without exposing the key to browser JavaScript. The `.env` file is ignored by Git.
-
-Add the deployed website hostname under **Firebase Authentication → Settings → Authorized
-domains** before using sign-in on a hosted domain. For local testing, `localhost` must be listed
-there; opening `www/index.html` directly with `file://` will not pass Firebase's
-authorized-domain check.
-
-### Host on Vercel
-
-The Vercel project uses the repository root, runs `npm run vendor`, and publishes `www/`.
-Gemini requests run through authenticated Node.js functions under `api/`; they require a
-Firebase sign-in and read `GEMINI_API_KEY` from the Vercel Production/Preview environment.
-Add the deployed `*.vercel.app` hostname to Firebase Authentication → Settings → Authorized
-domains. **Never** add the Gemini key to a `NEXT_PUBLIC_` variable or any client-side file.
+Add your `*.vercel.app` hostname to **Firebase Authentication → Settings → Authorized domains**. Never put the Gemini key in a client-side or `NEXT_PUBLIC_` variable.
 
 ---
 
-## Data and privacy
+## Data & Privacy
 
-- Attendance, imported course totals, dated marks, weekly timetable, and selected preferences
-  sync to Firestore. Firestore rules restrict each account to its own workspace. Existing local
-  data is merged when you first sign in.
-- Gemini API keys are read by the local Node server from `.env` and by Vercel Functions from
-  the server-side environment; they are never sent to the browser or synced to Firestore.
-  Timetable photos and wallpaper images remain on-device.
-- The Firebase web configuration includes a public Firebase API key; it is not a Gemini key
-  or a password. Do not put private Gemini keys in source files.
-- The app does not send analytics. Google Fonts is optional and falls back to system fonts
-  offline. Export libraries (jsPDF, SheetJS) and the Firebase SDK bundle are generated into
-  `www/vendor` during installation and are never fetched from a CDN at runtime.
-- Backups are user-initiated files. Treat an exported JSON backup as personal data.
+- Attendance records, course totals, dated marks, timetable, and preferences sync to Firestore. Security rules restrict every account strictly to its own workspace.
+- The Gemini API key is read server-side only — `.env` locally, Vercel environment in production. Never sent to the browser or written to Firestore.
+- Timetable photos and wallpaper images stay on-device.
+- The Firebase web config includes a public Firebase API key — that's not a secret. Don't put private Gemini keys anywhere in source.
+- No analytics. Google Fonts falls back to system fonts offline. Export libraries and the Firebase SDK are pre-bundled into `www/vendor` at install time — never fetched from a CDN at runtime.
+- Exported backups are user-initiated files — treat them as personal data.
 
 ---
 
-## Known limitations
+## Known Limitations
 
-- The APK is a debug build, not Play Store-signed or Play Store-ready.
-- Reminder delivery depends on Android/OEM battery management. On aggressive OEMs (e.g.
-  OPPO/Realme), set battery usage to **Unrestricted** and allow auto-launch.
-- Reminders are scheduled for a rolling 14-day window when the app runs. Reopen the app
-  periodically to replenish the window. A force-stop or reboot can affect pending deliveries.
-- The launcher controls widget refresh cadence; the widget also refreshes when the app writes
-  data.
-- The UI is one large `www/index.html` file. It works, but it is the main thing to refactor if
-  you want to contribute substantially.
+- Debug build only — not Play Store-signed or Play Store-ready.
+- Reminder delivery depends on Android battery management. On aggressive OEMs (e.g. OPPO/Realme), set battery usage to **Unrestricted** and allow auto-launch.
+- Reminders are scheduled for a rolling 14-day window when the app runs. Reopen periodically to replenish it; a force-stop or reboot can affect pending deliveries.
+- The launcher controls widget refresh cadence; the widget also refreshes when the app writes data.
+- The UI lives in one large `www/index.html` — it works, but that's the main thing to refactor if you want to contribute substantially.
 
 ---
 
-## Project layout
+## Project Layout
 
 ```
-www/                  single-page web app (HTML/CSS/JS) + icons
-  firebase-sync.js    Firebase Authentication and Firestore sync client
-  vendor/             generated at install time (jsPDF, SheetJS, Firebase SDK bundle)
-firebase.json         Firestore Enterprise database configuration
-firestore.rules       Per-user Firestore security rules
-overlay/              native Android sources/resources copied into the Capacitor project
-scripts/patch_android.py   injects widget, permissions, and icons after `cap add android`
-scripts/vendor_libs.js      copies and bundles browser libraries into www/vendor
-keystore/debug.keystore     stable debug signing key (personal use only)
-.github/workflows/    CI that builds the debug APK
-api/                  Vercel serverless functions (Gemini proxy)
+www/                        Single-page web app (HTML/CSS/JS) + icons
+  firebase-sync.js          Firebase Auth and Firestore sync client
+  vendor/                   Generated at install time (jsPDF, SheetJS, Firebase SDK)
+firebase.json               Firestore database configuration
+firestore.rules             Per-user Firestore security rules
+overlay/                    Native Android sources copied into the Capacitor project
+scripts/patch_android.py    Injects widget, permissions, and icons after `cap add android`
+scripts/vendor_libs.js      Bundles browser libraries into `www/vendor`
+keystore/debug.keystore     Stable debug key (personal use only)
+.github/workflows/          CI that builds the debug APK on every push
+api/                        Vercel serverless functions (Gemini proxy)
 ```
 
 ---
 
 ## Contributing
 
-Issues and pull requests are welcome. Keep changes focused, test on a real Android device when
-touching the native widget or notifications, and export a backup before testing import/export.
+Issues and PRs are welcome. Keep changes focused, test on a real Android device when touching the native widget or notifications, and export a backup before testing import/export.
 
 ---
 
