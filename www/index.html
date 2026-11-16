@@ -1893,10 +1893,6 @@ body.ui-normal .card{background:rgb(24,25,28) !important;border:1px solid rgba(2
 
 </div>
 
-<button class="fab" id="addFab" aria-label="Add subject">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-</button>
-
 <div class="navbar">
   <div class="navbar-inner" id="navInner">
     <div class="nav-lens" id="navLens"></div>
@@ -3217,7 +3213,7 @@ function openAddOverlay(){
   stackPush('addOverlay', ()=> document.getElementById('addOverlay').classList.remove('open'));
   haptic(H.open);
 }
-document.getElementById('addFab').onclick = openAddOverlay;
+// Floating plus action removed; add subjects from the Home controls.
 document.getElementById('cancelAdd').onclick = ()=>{ document.getElementById('addOverlay').classList.remove('open'); stackRemove('addOverlay'); haptic(H.close); };
 document.getElementById('confirmAdd').onclick = ()=>{
   const name = document.getElementById('newSubjectName').value.trim();
