@@ -227,6 +227,11 @@ function runAuth(task) {
 }
 
 function initAuthControls() {
+  const isNative = Boolean(window.Capacitor?.isNativePlatform?.() || window.Capacitor?.getPlatform?.() === 'android' || window.Capacitor?.getPlatform?.() === 'ios');
+  // Native Google OAuth is intentionally hidden until a production signing
+  // certificate is configured. Email/password and phone auth remain available
+  // in the APK; the full provider set remains available on the web app.
+  if (isNative && $('cloudGoogleBtn')) $('cloudGoogleBtn').style.display = 'none';
   $('cloudSignInBtn').onclick = () => runAuth(() => signInWithEmailAndPassword(auth, $('cloudEmail').value.trim(), $('cloudPassword').value));
   $('cloudCreateBtn').onclick = () => runAuth(() => createUserWithEmailAndPassword(auth, $('cloudEmail').value.trim(), $('cloudPassword').value));
   $('cloudGoogleBtn').onclick = () => runAuth(() => {
