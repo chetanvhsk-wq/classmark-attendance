@@ -32,6 +32,7 @@ This file tracks the major features and improvements added to Classmark.
 
 ## Interface and visual design
 
+- Removed the persistent floating plus button from the bottom-right on web and Android; subject creation remains available from the Home controls.
 - Added Skeuomorphic, Glass, Matte, and Normal interface styles, with light and dark appearance options.
 - Updated theme styling so the chosen interface style applies across cards, settings, inputs, dialogs, and other surfaces.
 - Refined Glass mode with translucent blurred surfaces and a transparent page/navigation background.
