@@ -1,7 +1,7 @@
 import { initializeApp, getApps } from 'firebase/app';
 import {
   getAuth, onAuthStateChanged, createUserWithEmailAndPassword,
-  signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider,
+  signInWithEmailAndPassword, signInWithPopup, signInWithCredential, GoogleAuthProvider,
   signInWithPhoneNumber, RecaptchaVerifier, signOut,
 } from 'firebase/auth';
 import {
@@ -232,8 +232,15 @@ function initAuthControls() {
   $('cloudGoogleBtn').onclick = () => runAuth(() => {
     const isNative = Boolean(window.Capacitor?.isNativePlatform?.() || window.Capacitor?.getPlatform?.() === 'android' || window.Capacitor?.getPlatform?.() === 'ios');
     if (isNative) {
-      window.classmarkApp.notify('Google sign-in is not available in the bundled APK yet. Use email/password or phone sign-in.');
-      return;
+      const googleAuth = window.Capacitor?.Plugins?.GoogleAuth;
+      if (!googleAuth) throw new Error('Native Google sign-in is unavailable in this APK build. Reinstall the latest APK.');
+      return googleAuth.initialize({ scopes: ['profile', 'email'], grantOfflineAccess: true })
+        .then(() => googleAuth.signIn())
+        .then(result => {
+          const idToken = result?.authentication?.idToken || result?.idToken;
+          if (!idToken) throw new Error('Google did not return an ID token.');
+          return signInWithCredential(auth, GoogleAuthProvider.credential(idToken));
+        });
     }
     return signInWithPopup(auth, new GoogleAuthProvider());
   });
