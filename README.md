@@ -12,9 +12,10 @@ It answers one question: *how many classes can I skip, or how many do I need to 
 
 [![Build Android APK](https://github.com/chetanvhsk-wq/classmark-attendance/actions/workflows/build-apk.yml/badge.svg)](https://github.com/chetanvhsk-wq/classmark-attendance/actions)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Live demo](https://img.shields.io/badge/Live%20demo-Classmark-ff6b6b?logo=vercel&logoColor=white)](https://classmark-attendance-nexus-9af5.vercel.app/)
 ![Platform](https://img.shields.io/badge/platform-Android%20%7C%20Web%20PWA-brightgreen)
-![Firebase](https://img.shields.io/badge/backend-Firebase-orange?logo=firebase&logoColor=white)
-![Vercel](https://img.shields.io/badge/hosted%20on-Vercel-black?logo=vercel&logoColor=white)
+[![Firebase](https://img.shields.io/badge/backend-Firebase-orange?logo=firebase&logoColor=white)](https://classmark-attendance-nexus-9af5.vercel.app/)
+[![Vercel](https://img.shields.io/badge/hosted%20on-Vercel-black?logo=vercel&logoColor=white)](https://classmark-attendance-nexus-9af5.vercel.app/)
 
 </div>
 
