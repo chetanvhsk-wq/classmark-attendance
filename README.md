@@ -18,8 +18,21 @@ It answers one question: *how many classes can I skip, or how many do I need to 
 [![Vercel](https://img.shields.io/badge/hosted%20on-Vercel-black?logo=vercel&logoColor=white)](https://classmark-attendance-nexus-9af5.vercel.app/)
 
 [![See all updates](https://img.shields.io/badge/See%20all%20updates-changelog-6c63ff?style=for-the-badge)](updates.md)
+[![Problems overcome](https://img.shields.io/badge/Problems%20overcome-read%20the%20log-8b5cf6?style=for-the-badge)](problems.md)
 
 </div>
+
+## Start here
+
+| Need | Go to |
+|---|---|
+| Try the app | [Live web app](https://classmark-attendance-nexus-9af5.vercel.app/) |
+| Install Android | [Latest release](https://github.com/chetanvhsk-wq/classmark-attendance/releases/tag/v1.0.1) |
+| See what changed | [Updates](updates.md) |
+| Understand the fixes | [Problems overcome](problems.md) |
+| Run locally | [Run Locally](#run-locally) |
+
+Classmark is a local-first attendance tracker with optional Firebase sync. You can use it in the browser without an account; sign-in enables syncing across devices.
 
 ## Origin
 
@@ -165,3 +178,13 @@ Issues and PRs are welcome. Keep changes focused, test on a real Android device 
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+<div align="center">
+
+### Project history
+
+[Read the complete problems overcome log →](problems.md) · [View all updates →](updates.md)
+
+</div>
