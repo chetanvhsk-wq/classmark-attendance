@@ -34,6 +34,8 @@ It answers one question: *how many classes can I skip, or how many do I need to 
 
 Classmark is a local-first attendance tracker with optional Firebase sync. You can use it in the browser without an account; sign-in enables syncing across devices.
 
+> **One account, every device:** Sign up once with Google or email/password and use that same account anywhere. Google-created accounts can also be given an email/password login from Firebase, so email/password remains a backup if Google sign-in is unavailable. Attendance, timetable, preferences, and other synced changes are reflected across every device signed in to the same account.
+
 ## Origin
 
 Classmark started as a fork of [Akshays-14/attendance-system-android](https://github.com/Akshays-14/attendance-system-android), a solid student attendance tracker built by **Akshay S** and **Bezaleel Paul**. Their original project laid the foundation.
