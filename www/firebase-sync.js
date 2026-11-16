@@ -1,7 +1,7 @@
 import { initializeApp, getApps } from 'firebase/app';
 import {
   getAuth, onAuthStateChanged, createUserWithEmailAndPassword,
-  signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider,
+  signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider,
   signInWithPhoneNumber, RecaptchaVerifier, signOut,
 } from 'firebase/auth';
 import {
@@ -231,7 +231,11 @@ function initAuthControls() {
   $('cloudCreateBtn').onclick = () => runAuth(() => createUserWithEmailAndPassword(auth, $('cloudEmail').value.trim(), $('cloudPassword').value));
   $('cloudGoogleBtn').onclick = () => runAuth(() => {
     const isNative = Boolean(window.Capacitor?.isNativePlatform?.() || window.Capacitor?.getPlatform?.() === 'android' || window.Capacitor?.getPlatform?.() === 'ios');
-    return isNative ? signInWithRedirect(auth, new GoogleAuthProvider()) : signInWithPopup(auth, new GoogleAuthProvider());
+    if (isNative) {
+      window.classmarkApp.notify('Google sign-in is not available in the bundled APK yet. Use email/password or phone sign-in.');
+      return;
+    }
+    return signInWithPopup(auth, new GoogleAuthProvider());
   });
   $('cloudPhoneSendBtn').onclick = () => runAuth(async () => {
     const number = $('cloudPhone').value.trim();
