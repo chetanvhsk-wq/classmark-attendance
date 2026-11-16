@@ -2585,82 +2585,76 @@ document.getElementById('exportPdfBtn').onclick = async ()=>{
   try{
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({unit:'mm',format:'a4'});
-    const subjects = state.subjects.map(s=>{
-      const t = totals(s);
-      const pct = t.total ? Math.round((t.present/t.total)*100) : 0;
-      return {s,t,pct,absent:Math.max(0,t.total-t.present)};
+    const rows = state.subjects.map(s=>{
+      const t=totals(s), pct=t.total?Math.round(t.present/t.total*100):0;
+      return {name:s.name,code:s.code||'',present:t.present,absent:Math.max(0,t.total-t.present),total:t.total,pct,target:Number(s.target||75)};
     });
-    const present = subjects.reduce((n,x)=>n+x.t.present,0);
-    const absent = subjects.reduce((n,x)=>n+x.absent,0);
-    const total = present + absent;
-    const overall = total ? Math.round(present/total*100) : 0;
-    const onTrack = subjects.filter(x=>x.pct >= Number(x.s.target||75)).length;
-    const accent=[255,110,110], ink=[31,41,55], muted=[105,116,137], green=[40,160,92], red=[218,76,76], blue=[91,126,219];
+    const present=rows.reduce((n,x)=>n+x.present,0), absent=rows.reduce((n,x)=>n+x.absent,0), total=present+absent;
+    const overall=total?Math.round(present/total*100):0, onTarget=rows.filter(x=>x.pct>=x.target).length;
+    const ink=[31,41,55], muted=[103,116,137], green=[39,165,93], red=[219,76,76], blue=[75,111,205], accent=[255,110,110];
     const header=(title,subtitle)=>{
-      doc.setFillColor(21,27,38); doc.rect(0,0,210,29,'F');
-      doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.text(title,14,13);
-      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(196,205,219); doc.text(subtitle,14,21);
-      doc.setTextColor(...ink);
+      doc.setFillColor(20,28,40);doc.rect(0,0,210,30,'F');
+      doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(19);doc.text(title,14,14);
+      doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(198,207,220);doc.text(subtitle,14,22);
     };
-    const card=(x,y,w,label,value,color)=>{
-      doc.setFillColor(248,249,252); doc.setDrawColor(229,233,241); doc.roundedRect(x,y,w,24,4,4,'FD');
-      doc.setFont('helvetica','bold'); doc.setFontSize(17); doc.setTextColor(...(color||ink)); doc.text(String(value),x+7,y+12);
-      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...muted); doc.text(label,x+7,y+19);
+    const metric=(x,label,value,color)=>{
+      doc.setFillColor(247,249,252);doc.setDrawColor(226,231,239);doc.roundedRect(x,42,42,25,4,4,'FD');
+      doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(...color);doc.text(String(value),x+7,55);
+      doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...muted);doc.text(label,x+7,62);
     };
-    const pie=(cx,cy,r,parts)=>{
+    const pie=(cx,cy,r)=>{
+      const parts=[{value:present,color:green},{value:absent,color:red}];
       let angle=-Math.PI/2;
       parts.forEach(part=>{
         const end=angle+(total?part.value/total:0)*Math.PI*2;
-        const pts=[[0,0]];
-        for(let i=0;i<=18;i++){const a=angle+(end-angle)*i/18;pts.push([r*Math.cos(a),r*Math.sin(a)]);}
-        doc.setFillColor(...part.color); doc.lines(pts,cx,cy,[1,1],'F',true); angle=end;
+        const steps=Math.max(1,Math.ceil(Math.abs(end-angle)/(Math.PI/36)));
+        for(let i=0;i<steps;i++){
+          const a1=angle+(end-angle)*i/steps, a2=angle+(end-angle)*(i+1)/steps;
+          doc.setFillColor(...part.color);
+          doc.triangle(cx,cy,cx+r*Math.cos(a1),cy+r*Math.sin(a1),cx+r*Math.cos(a2),cy+r*Math.sin(a2),'F');
+        }
+        angle=end;
       });
-      doc.setFillColor(255,255,255); doc.circle(cx,cy,r*.44,'F');
-      doc.setTextColor(...ink); doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.text(overall+'%',cx,cy+2,{align:'center'});
+      doc.setFillColor(255,255,255);doc.circle(cx,cy,r*.45,'F');
+      doc.setTextColor(...ink);doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text(overall+'%',cx,cy+2,{align:'center'});
     };
-    const bar=(label,value,y,color)=>{
-      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...ink);
-      doc.text(String(label).slice(0,29),14,y);
-      doc.setFillColor(232,236,243); doc.roundedRect(76,y-4,92,6,2,2,'F');
-      doc.setFillColor(...color); doc.roundedRect(76,y-4,Math.max(2,92*Math.min(100,value)/100),6,2,2,'F');
-      doc.setFont('helvetica','bold'); doc.text(value+'%',174,y);
+    const bar=(item,y)=>{
+      doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(...ink);
+      doc.text(String(item.name).slice(0,28),14,y);
+      doc.setFillColor(232,236,243);doc.roundedRect(75,y-4,103,7,2,2,'F');
+      doc.setFillColor(...(item.pct>=item.target?green:red));doc.roundedRect(75,y-4,Math.max(2,103*Math.min(100,item.pct)/100),7,2,2,'F');
+      doc.setFont('helvetica','bold');doc.text(item.pct+'%',184,y);
     };
-    header('Classmark attendance','A clear view of your attendance, targets, and next actions · '+todayStr());
-    doc.setTextColor(...ink); doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.text('Your overview',14,42);
-    card(14,48,42,'Overall',overall+'%',overall>=75?green:red);
-    card(60,48,42,'Classes tracked',total,blue);
-    card(106,48,42,'On target',onTrack+'/'+subjects.length,green);
-    card(152,48,44,'Subjects',subjects.length,accent);
-    doc.setFillColor(248,249,252); doc.setDrawColor(229,233,241); doc.roundedRect(14,80,182,70,5,5,'FD');
-    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...ink); doc.text('Attendance mix',24,91);
-    pie(48,116,22,[{value:present,color:green},{value:absent,color:red}]);
-    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setFillColor(...green); doc.circle(88,108,2,'F'); doc.setTextColor(...muted); doc.text('Present  '+present,94,110);
-    doc.setFillColor(...red); doc.circle(88,121,2,'F'); doc.setTextColor(...muted); doc.text('Absent  '+absent,94,123);
-    doc.setFont('helvetica','bold'); doc.setTextColor(...ink); doc.text('Target insight',130,103);
-    doc.setFont('helvetica','normal'); doc.setTextColor(...muted);
-    doc.text(overall>=75?'You are currently on track.':'Your overall attendance needs attention.',130,111);
-    doc.text(onTrack+' of '+subjects.length+' subjects meet their target.',130,119);
-    doc.setFont('helvetica','bold'); doc.setTextColor(...ink); doc.text('Subject performance',14,163);
-    let y=174;
-    subjects.slice().sort((a,b)=>a.pct-b.pct).forEach(x=>{bar(x.s.name,x.pct,y,x.pct>=Number(x.s.target||75)?green:red);y+=9;});
-    y=Math.max(y+5,subjects.length?y:174);
-    if(y>266){doc.addPage();header('Subject details','Attendance counts and targets');y=44;} else {doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...ink);doc.text('Detailed counts',14,y);y+=8;}
-    doc.setFillColor(240,243,248);doc.rect(14,y-5,182,8,'F');doc.setFontSize(8);doc.setTextColor(...muted);
-    doc.text('Subject',16,y);doc.text('Present',120,y);doc.text('Absent',143,y);doc.text('Total',165,y);doc.text('Target',182,y);
-    y+=9;
-    subjects.forEach(x=>{
-      if(y>280){doc.addPage();header('Subject details','Attendance counts and targets');y=44;}
-      doc.setTextColor(...ink);doc.setFont('helvetica','normal');doc.text(String(x.s.name).slice(0,42),16,y);
-      doc.text(String(x.t.present),122,y);doc.text(String(x.absent),145,y);doc.text(String(x.t.total),167,y);doc.text(String(x.s.target||75)+'%',182,y);y+=7;
+    header('Classmark attendance','Important percentages at a glance · '+todayStr());
+    doc.setTextColor(...ink);doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text('Attendance summary',14,36);
+    metric(14,'Overall',overall+'%',overall>=75?green:red);metric(60,'Present',present,green);metric(106,'Absent',absent,red);metric(152,'On target',onTarget+'/'+rows.length,blue);
+    doc.setFillColor(248,249,252);doc.setDrawColor(226,231,239);doc.roundedRect(14,76,182,11,4,4,'FD');
+    doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...muted);doc.text('SUBJECT',18,83);doc.text('PRESENT',124,83);doc.text('ABSENT',145,83);doc.text('TOTAL',165,83);doc.text('PERCENT',181,83);
+    let y=97;
+    rows.forEach(item=>{
+      doc.setDrawColor(232,236,243);doc.line(14,y+4,196,y+4);
+      doc.setFont('helvetica','normal');doc.setFontSize(8.7);doc.setTextColor(...ink);doc.text(String(item.name).slice(0,37),18,y);
+      doc.setTextColor(...muted);doc.text(String(item.present),126,y);doc.text(String(item.absent),147,y);doc.text(String(item.total),167,y);
+      doc.setFont('helvetica','bold');doc.setTextColor(...(item.pct>=item.target?green:red));doc.text(item.pct+'%',181,y);y+=10;
     });
-    const schedule=settings.weeklyTimetable||[];
-    if(schedule.length){doc.addPage();header('Weekly timetable','Your class schedule and reminder plan');let sy=44;const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];schedule.slice().sort((a,b)=>Number(a.day)-Number(b.day)).forEach(item=>{if(sy>280){doc.addPage();header('Weekly timetable','Your class schedule and reminder plan');sy=44;}doc.setFillColor(248,249,252);doc.roundedRect(14,sy-5,182,10,3,3,'F');doc.setTextColor(...accent);doc.setFont('helvetica','bold');doc.text(days[Number(item.day)]||'Day',20,sy+1);doc.setTextColor(...ink);doc.setFont('helvetica','normal');doc.text(String(item.subject).slice(0,64),58,sy+1);sy+=14;});}
-    const history=[];state.subjects.forEach(s=>Object.keys(s.records||{}).sort().forEach(date=>(s.records[date]||[]).forEach((mark,i)=>history.push({date,subject:s.name,mark:mark==='present'?'Present':'Absent',index:i+1}))));
-    if(history.length){doc.addPage();header('Daily attendance log','Every dated attendance mark recorded in Classmark');let hy=44;history.sort((a,b)=>a.date.localeCompare(b.date)||a.subject.localeCompare(b.subject)||a.index-b.index).forEach(row=>{if(hy>280){doc.addPage();header('Daily attendance log','Every dated attendance mark recorded in Classmark');hy=44;}doc.setTextColor(...muted);doc.setFontSize(8);doc.text(row.date,16,hy);doc.setTextColor(...ink);doc.text(String(row.subject).slice(0,58),50,hy);doc.setTextColor(...(row.mark==='Present'?green:red));doc.text(row.mark,177,hy);hy+=7;});}
-    const pages=doc.getNumberOfPages();for(let p=1;p<=pages;p++){doc.setPage(p);doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(...muted);doc.text('Classmark · private attendance report',14,291);doc.text('Page '+p+' of '+pages,196,291,{align:'right'});}
+    doc.setFillColor(245,247,250);doc.roundedRect(14,y+6,182,23,4,4,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...ink);doc.text('Quick insight',21,y+16);
+    doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(...muted);
+    doc.text(overall>=75?'Your overall attendance is currently on track.':'Your overall attendance needs attention.',21,y+22);
+    doc.setTextColor(...muted);doc.setFontSize(7);doc.text('Classmark · private attendance report',14,291);doc.text('Page 1 of 2',196,291,{align:'right'});
+    doc.addPage();header('Classmark insights','Bar graph and attendance mix · '+todayStr());
+    doc.setTextColor(...ink);doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text('Present vs absent',14,42);
+    pie(48,79,23);
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setFillColor(...green);doc.circle(86,70,2,'F');doc.setTextColor(...muted);doc.text('Present  '+present,93,72);
+    doc.setFillColor(...red);doc.circle(86,83,2,'F');doc.setTextColor(...muted);doc.text('Absent  '+absent,93,85);
+    doc.setTextColor(...ink);doc.setFont('helvetica','bold');doc.text('Subject percentages',14,120);
+    let byPct=rows.slice().sort((a,b)=>a.pct-b.pct), by=132;
+    byPct.forEach(item=>{bar(item,by);by+=11;});
+    doc.setTextColor(...muted);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.text('Green meets the subject target · red is below target.',14,by+8);
+    doc.text('Classmark · private attendance report',14,291);doc.text('Page 2 of 2',196,291,{align:'right'});
     await saveFile('attend-report-'+todayStr()+'.pdf',doc.output('blob'),'application/pdf');
-    if(!isNativeApp()) showToast('Polished PDF downloaded');
-  }catch(err){ alert('Could not generate PDF: ' + (err && err.message ? err.message : err)); }
+    if(!isNativeApp()) showToast('PDF downloaded');
+  }catch(err){alert('Could not generate PDF: '+(err&&err.message?err.message:err));}
 };
 document.getElementById('exportXlsxBtn').onclick = async ()=>{
   try{
