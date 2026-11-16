@@ -17,6 +17,8 @@ It answers one question: *how many classes can I skip, or how many do I need to 
 [![Firebase](https://img.shields.io/badge/backend-Firebase-orange?logo=firebase&logoColor=white)](https://classmark-attendance-nexus-9af5.vercel.app/)
 [![Vercel](https://img.shields.io/badge/hosted%20on-Vercel-black?logo=vercel&logoColor=white)](https://classmark-attendance-nexus-9af5.vercel.app/)
 
+[![See all updates](https://img.shields.io/badge/See%20all%20updates-changelog-6c63ff?style=for-the-badge)](updates.md)
+
 </div>
 
 ## Origin
