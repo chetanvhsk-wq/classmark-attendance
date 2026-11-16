@@ -1,7 +1,7 @@
 import { initializeApp, getApps } from 'firebase/app';
 import {
   getAuth, onAuthStateChanged, createUserWithEmailAndPassword,
-  signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider,
+  signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider,
   signInWithPhoneNumber, RecaptchaVerifier, signOut,
 } from 'firebase/auth';
 import {
@@ -229,7 +229,7 @@ function runAuth(task) {
 function initAuthControls() {
   $('cloudSignInBtn').onclick = () => runAuth(() => signInWithEmailAndPassword(auth, $('cloudEmail').value.trim(), $('cloudPassword').value));
   $('cloudCreateBtn').onclick = () => runAuth(() => createUserWithEmailAndPassword(auth, $('cloudEmail').value.trim(), $('cloudPassword').value));
-  $('cloudGoogleBtn').onclick = () => runAuth(() => signInWithPopup(auth, new GoogleAuthProvider()));
+  $('cloudGoogleBtn').onclick = () => runAuth(() => {\n    const isNative = Boolean(window.Capacitor?.isNativePlatform?.() || window.Capacitor?.getPlatform?.() === 'android' || window.Capacitor?.getPlatform?.() === 'ios');\n    return isNative ? signInWithRedirect(auth, new GoogleAuthProvider()) : signInWithPopup(auth, new GoogleAuthProvider());\n  });
   $('cloudPhoneSendBtn').onclick = () => runAuth(async () => {
     const number = $('cloudPhone').value.trim();
     if (!number) throw Object.assign(new Error('Enter your phone number with its country code.'), { code: 'auth/missing-phone-number' });
