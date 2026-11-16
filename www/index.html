@@ -1449,6 +1449,105 @@ body.ui-skeu #styleRow .style-chip.active,body.ui-skeu #fontStyleRow .style-chip
 #fontStyleRow [data-font="squared"]{font-family:"Space Mono",monospace !important;}
 .style-chip:focus-visible{outline:2px solid rgba(var(--accent),.9);outline-offset:3px;}
 .style-chip[aria-pressed="true"]{font-weight:750;}
+
+/* Reference tactile system: shared by the web build and Capacitor Android app. */
+body.ui-glass{
+  --glass-blur:clamp(16px,5vw,32px);
+  --glass-alpha:.14;
+  --glass-rim:.62;
+}
+body.ui-glass .card,
+body.ui-glass .settings-group .settings-block,
+body.ui-glass .sheet,
+body.ui-glass .timetable-row,
+body.ui-glass .timetable-photo-wrap,
+body.ui-glass .ai-preview{
+  background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.055)) !important;
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.6) contrast(1.04);
+  backdrop-filter:blur(var(--glass-blur)) saturate(1.6) contrast(1.04);
+  border:1px solid rgba(255,255,255,.22) !important;
+  border-top-color:rgba(255,255,255,.48) !important;
+  border-left-color:rgba(255,255,255,.28) !important;
+  border-bottom-color:rgba(0,0,0,.22) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.36),0 18px 42px -24px rgba(0,0,0,.58) !important;
+}
+body.ui-glass.tone-light .card,
+body.ui-glass.tone-light .settings-group .settings-block,
+body.ui-glass.tone-light .sheet,
+body.ui-glass.tone-light .timetable-row,
+body.ui-glass.tone-light .timetable-photo-wrap,
+body.ui-glass.tone-light .ai-preview{
+  background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.42)) !important;
+  border-color:rgba(255,255,255,.7) !important;
+  border-bottom-color:rgba(43,54,72,.12) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.82),0 18px 42px -26px rgba(42,58,82,.24) !important;
+}
+body.ui-glass .style-chip,
+body.ui-glass .mode-chip,
+body.ui-glass .action-btn,
+body.ui-glass .util-btn,
+body.ui-glass .btn-secondary,
+body.ui-glass .csel-btn{
+  background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.07)) !important;
+  border:1px solid rgba(255,255,255,.26) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.32),0 8px 18px -14px rgba(0,0,0,.7) !important;
+  transition:transform 160ms ease,box-shadow 160ms ease,background 160ms ease !important;
+}
+body.ui-glass .style-chip:active,
+body.ui-glass .mode-chip:active,
+body.ui-glass .action-btn:active,
+body.ui-glass .util-btn:active,
+body.ui-glass .btn-secondary:active,
+body.ui-glass .csel-btn:active{
+  transform:translateY(1px) scale(.985);
+  box-shadow:inset 0 2px 7px rgba(0,0,0,.24),inset 0 -1px 0 rgba(255,255,255,.16) !important;
+}
+body.ui-glass .style-chip.active,
+body.ui-glass .mode-chip.active{
+  background:linear-gradient(145deg,rgba(var(--accent),.78),rgba(var(--accent),.48)) !important;
+  color:#fff !important;
+  border-color:rgba(255,255,255,.38) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 9px 20px -13px rgba(var(--accent),.9) !important;
+}
+body.ui-glass .navbar-inner{
+  background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.06)) !important;
+  -webkit-backdrop-filter:blur(calc(var(--glass-blur) + 4px)) saturate(1.6);
+  backdrop-filter:blur(calc(var(--glass-blur) + 4px)) saturate(1.6);
+  border:1px solid rgba(255,255,255,.3) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.42),0 13px 30px -18px rgba(0,0,0,.6) !important;
+}
+body.ui-glass.tone-light .navbar-inner{background:linear-gradient(145deg,rgba(255,255,255,.76),rgba(255,255,255,.46)) !important;}
+
+body.ui-skeu{--skeu-bg:42,41,37;--text:240,235,222;background:rgb(var(--skeu-bg)) !important;}
+body.ui-skeu #wallpaper{opacity:0 !important;}
+body.ui-skeu .app{background:rgb(var(--skeu-bg)) !important;}
+body.ui-skeu .card,
+body.ui-skeu .settings-group .settings-block{
+  background:rgb(var(--skeu-bg)) !important;
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+  border:0 !important;border-radius:20px;
+  box-shadow:8px 8px 16px rgba(0,0,0,.45),-8px -8px 16px rgba(255,255,255,.045) !important;
+}
+body.ui-skeu .subject-card{box-shadow:inset 0 0 0 1px rgba(0,0,0,.15),8px 8px 16px rgba(0,0,0,.45),-8px -8px 16px rgba(255,255,255,.045) !important;}
+body.ui-skeu.tone-light{--skeu-bg:226,228,233;--text:40,42,48;background:rgb(var(--skeu-bg)) !important;}
+body.ui-skeu.tone-light .app{background:rgb(var(--skeu-bg)) !important;}
+body.ui-skeu.tone-light .card,
+body.ui-skeu.tone-light .settings-group .settings-block{
+  background:rgb(var(--skeu-bg)) !important;
+  box-shadow:7px 7px 14px rgba(163,166,175,.55),-7px -7px 14px rgba(255,255,255,.85) !important;
+}
+body.ui-skeu.tone-light .subject-card{box-shadow:inset 0 0 0 1px rgba(163,166,175,.15),7px 7px 14px rgba(163,166,175,.55),-7px -7px 14px rgba(255,255,255,.85) !important;}
+body.ui-skeu .style-chip:active,body.ui-skeu .mode-chip:active,body.ui-skeu .action-btn:active{transform:translateY(1px);box-shadow:inset 2px 2px 5px rgba(0,0,0,.42),inset -1px -1px 3px rgba(255,255,255,.08) !important;}
+
+body.ui-matte .card{background:#202124 !important;border:1px solid rgba(255,255,255,.06) !important;border-bottom:2px solid rgba(var(--accent),.52) !important;border-radius:14px;box-shadow:none !important;-webkit-backdrop-filter:none;backdrop-filter:none;}
+body.ui-normal .card{background:rgb(24,25,28) !important;border:1px solid rgba(255,255,255,.1) !important;border-radius:10px;box-shadow:none !important;-webkit-backdrop-filter:none;backdrop-filter:none;}
+
+#fontStyleRow [data-font="default"]{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;}
+#fontStyleRow [data-font="rounded"]{font-family:"Quicksand",-apple-system,sans-serif !important;}
+#fontStyleRow [data-font="handwritten"]{font-family:"Patrick Hand",-apple-system,sans-serif !important;}
+#fontStyleRow [data-font="serif"]{font-family:"Lora",Georgia,serif !important;}
+#fontStyleRow [data-font="squared"]{font-family:"Space Mono",monospace !important;}
+
 </style>
 </head>
 <body>
@@ -1627,17 +1726,17 @@ body.ui-skeu #styleRow .style-chip.active,body.ui-skeu #fontStyleRow .style-chip
       <div class="card settings-block" id="skeuToneBlock">
         <h3>Appearance<span class="current-val" id="curSkeuTone">Light</span></h3>
         <div class="color-mode-row">
-          <div class="mode-chip tone-chip" data-tone="light" tabindex="0">Light</div>
-          <div class="mode-chip tone-chip" data-tone="dark" tabindex="0">Dark</div>
+          <button type="button" class="mode-chip tone-chip" data-tone="light" aria-pressed="false">Light</button>
+          <button type="button" class="mode-chip tone-chip" data-tone="dark" aria-pressed="false">Dark</button>
         </div>
       </div>
 
       <div class="card settings-block" id="colorModeBlock">
         <h3>Style color<span class="current-val" id="curStyleColor">Preset · Blue</span></h3>
         <div class="color-mode-row">
-          <div class="mode-chip" data-mode="preset" tabindex="0">Preset</div>
-          <div class="mode-chip" data-mode="custom" tabindex="0">Custom</div>
-          <div class="mode-chip" data-mode="wallpaper" tabindex="0">From wallpaper</div>
+          <button type="button" class="mode-chip" data-mode="preset" aria-pressed="false">Preset</button>
+          <button type="button" class="mode-chip" data-mode="custom" aria-pressed="false">Custom</button>
+          <button type="button" class="mode-chip" data-mode="wallpaper" aria-pressed="false">From wallpaper</button>
         </div>
         <div class="accent-row" id="accentRow"></div>
         <div class="color-picker-wrap" id="customColorWrap" style="display:none; margin-top:10px;">
@@ -2290,7 +2389,16 @@ function applySettings(){
   document.getElementById('skeuToneBlock').style.display = 'block';
   document.getElementById('wallpaperBlock').style.display = isSkeu ? 'none' : 'block';
   document.querySelector('[data-mode="wallpaper"]').style.display = isSkeu ? 'none' : 'block';
-  document.querySelectorAll('.tone-chip').forEach(c=> c.classList.toggle('active', c.dataset.tone === settings.skeuTone));
+  document.querySelectorAll('.tone-chip').forEach(c=>{
+    const selected = c.dataset.tone === settings.skeuTone;
+    c.classList.toggle('active', selected);
+    c.setAttribute('aria-pressed', String(selected));
+  });
+  document.querySelectorAll('.mode-chip:not(.tone-chip):not(.reminder-chip)').forEach(c=>{
+    const selected = c.dataset.mode === settings.colorMode;
+    c.classList.toggle('active', selected);
+    c.setAttribute('aria-pressed', String(selected));
+  });
   if(isSkeu && settings.colorMode === 'wallpaper'){ settings.colorMode = 'preset'; }
 
   const g = settings.glass;
@@ -2314,7 +2422,6 @@ function applySettings(){
     c.classList.toggle('active',selected);
     c.setAttribute('aria-pressed',String(selected));
   });
-  document.querySelectorAll('.mode-chip:not(.tone-chip):not(.reminder-chip)').forEach(c=> c.classList.toggle('active', c.dataset.mode === settings.colorMode));
   document.getElementById('customColorWrap').style.display = settings.colorMode==='custom' ? 'flex' : 'none';
   document.getElementById('accentRow').style.display = settings.colorMode==='preset' ? 'flex' : 'none';
 
