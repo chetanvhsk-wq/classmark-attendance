@@ -103,3 +103,11 @@ Times below are repository commit times converted to IST (Asia/Kolkata).
 - GitHub release: [Classmark v1.0.0](https://github.com/chetanvhsk-wq/classmark-attendance/releases/tag/v1.0.0)
 - GitHub Package: [classmark-attendance](https://github.com/users/chetanvhsk-wq/packages/npm/package/classmark-attendance)
 - Latest Android workflow: [Build Android APK #38](https://github.com/chetanvhsk-wq/classmark-attendance/actions/runs/43883182553)
+
+### November 16, 2026 — Android Firebase sign-in fix
+
+- Fixed Google sign-in for the Android APK by switching native Capacitor builds from popup authentication to Firebase redirect authentication.
+- Added redirect-result handling when the APK returns from the system browser.
+- Web browser sign-in continues using the popup flow.
+- Firebase authorized domains and the Android package registration were verified in project attended-9480d.
+- Commit: 909f60d.
