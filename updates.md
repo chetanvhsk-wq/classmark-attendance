@@ -4,6 +4,26 @@
 
 This file tracks the major features and improvements added to Classmark.
 
+## Before November 15, 2026
+
+The first build phase included many small fixes and foundation changes that made the later redesign possible:
+
+- Imported and organized the original Android attendance project into the Classmark workspace.
+- Established the single-page web app and Capacitor Android build path from the shared www/ source.
+- Added Firebase project configuration, Authentication, Firestore rules, and per-user cloud synchronization.
+- Added email/password, Google, and phone sign-in flows with authorized-domain guidance.
+- Added the server-side Gemini proxy, environment-variable support, and secret-safe deployment configuration.
+- Added Vercel deployment configuration and connected the live web app at classmark-attendance-nexus-9af5.vercel.app.
+- Added local vendor bundling for Firebase, jsPDF, and SheetJS so the app does not depend on runtime CDNs.
+- Added attendance text parsing, ERP-table import, percentage recalculation from present/absent counts, and review-before-apply behavior.
+- Added timetable image upload, manual timetable editing, reminder scheduling, Android notifications, and widget support.
+- Added JSON/CSV/PDF/Excel export and import flows, then refined the reports with summary metrics, charts, and insights.
+- Added responsive touch interactions, swipe attendance marking, navigation states, loading states, settings controls, and mobile layout fixes.
+- Added the Classmark icon, sign-in branding, theme controls, font choices, accent colors, glass navigation, and accessibility improvements.
+- Removed unnecessary browser/search/Giphy integrations while keeping the useful AI overview and analysis features.
+
+These smaller foundation commits are part of the project history even when they were later combined, refined, or replaced by the larger November 15–16 changes.
+
 ## Attendance import and overview
 
 - Added local parsing for copied attendance tables and unstructured ERP text; basic text imports work without a Gemini API key.
