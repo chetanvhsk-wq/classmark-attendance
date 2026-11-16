@@ -19,14 +19,6 @@ It answers one question: *how many classes can I skip, or how many do I need to 
 
 </div>
 
----
-
-## Screenshot
-
-![Classmark glass navigation](docs/screenshots/glass-navigation.png)
-
----
-
 ## Origin
 
 Classmark started as a fork of [Akshays-14/attendance-system-android](https://github.com/Akshays-14/attendance-system-android), a solid student attendance tracker built by **Akshay S** and **Bezaleel Paul**. Their original project laid the foundation.
@@ -153,6 +145,12 @@ keystore/debug.keystore     Stable debug key (personal use only)
 .github/workflows/          CI that builds the debug APK on every push
 api/                        Vercel serverless functions (Gemini proxy)
 ```
+
+---
+
+## Screenshot
+
+![Classmark glass navigation](docs/screenshots/glass-navigation.png)
 
 ---
 
