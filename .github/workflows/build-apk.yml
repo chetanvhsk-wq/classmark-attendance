@@ -41,6 +41,9 @@ jobs:
       - name: Add Android platform
         run: npx cap add android
 
+      - name: Configure Firebase Android OAuth
+        run: cp google-services.json android/app/google-services.json
+
       - name: Apply native patches (widget, permissions, icon)
         run: python scripts/patch_android.py
 

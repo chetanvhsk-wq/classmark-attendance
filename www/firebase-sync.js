@@ -234,7 +234,11 @@ function initAuthControls() {
     if (isNative) {
       const googleAuth = window.Capacitor?.Plugins?.GoogleAuth;
       if (!googleAuth) throw new Error('Native Google sign-in is unavailable in this APK build. Reinstall the latest APK.');
-      return googleAuth.initialize({ scopes: ['profile', 'email'], grantOfflineAccess: true })
+      return googleAuth.initialize({
+        clientId: '10955156934-1grht2e5b18us57d0gquj9titnfbcgu7.apps.googleusercontent.com',
+        scopes: ['profile', 'email'],
+        grantOfflineAccess: true,
+      })
         .then(() => googleAuth.signIn())
         .then(result => {
           const idToken = result?.authentication?.idToken || result?.idToken;
