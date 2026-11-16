@@ -50,3 +50,36 @@ This file tracks the major features and improvements added to Classmark.
 
 - Maintained the web app and Capacitor Android app from the same project.
 - Connected the GitHub repository to Vercel for web deployments.
+
+## Chronological project log
+
+Times below are repository commit times converted to IST (Asia/Kolkata).
+
+### November 15, 2026
+
+- **15:09** — Simplified sign-in and applied the Classmark logo.
+- **15:10** — Recorded the sign-in/logo polish in the project documentation.
+- **19:37** — Made theme and font selectors accessible and previewable.
+- **19:38** — Documented the accessible theme and font controls.
+- **19:57** — Added the glass-navigation screenshot to the repository.
+- **19:57** — Showed the glass-navigation screenshot in the README.
+- **16:00–16:01** — Restored tactile glass styling and reliable theme controls; documented the restored tactile system.
+- **16:18–16:20** — Added playful tactile control feedback, documented it, then reverted the overly aggressive tactile styling and removed the reverted note.
+- **19:04–19:05** — Added polished PDF/Excel export layouts, an Excel Insights visual, and the focused two-page PDF summary/chart design.
+
+### November 16, 2026
+
+- **19:36** — Removed the persistent floating plus action from the web and Android UI while keeping subject creation in Home controls.
+- **19:36** — Documented the floating-plus removal.
+- **19:39–19:40** — Added GitHub Packages npm metadata, package documentation, publish workflow, and npm authentication configuration.
+- **19:41** — Published the Classmark v1.0.0 GitHub Release and published the classmark-attendance npm package to GitHub Packages. The Android APK workflow completed successfully and attached the APK to the release.
+- **20:03** — Replaced the README with the polished Classmark presentation, badges, origin/credits, setup documentation, and privacy guidance.
+- **20:07** — Linked the Live demo, Firebase, and Vercel badges to the deployed Classmark app.
+- **20:11** — Moved the README screenshot section to the end for a cleaner landing page.
+
+### Current release state
+
+- Live web app: [classmark-attendance-nexus-9af5.vercel.app](https://classmark-attendance-nexus-9af5.vercel.app/)
+- GitHub release: [Classmark v1.0.0](https://github.com/chetanvhsk-wq/classmark-attendance/releases/tag/v1.0.0)
+- GitHub Package: [classmark-attendance](https://github.com/users/chetanvhsk-wq/packages/npm/package/classmark-attendance)
+- Latest Android workflow: [Build Android APK #38](https://github.com/chetanvhsk-wq/classmark-attendance/actions/runs/43883182553)
