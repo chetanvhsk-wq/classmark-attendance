@@ -576,6 +576,12 @@ body.ui-skeu .nav-lens{ background:rgba(var(--accent),0.4); box-shadow:inset 1px
 .settings-group .settings-block{ margin-bottom:10px; }
 .settings-group .settings-block:last-child{ margin-bottom:0; }
 .settings-block{ padding:20px; margin-bottom:16px; }
+.creator-corner{ text-align:center; padding:8px 12px 22px; opacity:.72; }
+.creator-corner p{ margin:0 0 8px; font-size:11px; opacity:.72; }
+.creator-corner a{ display:inline-flex; align-items:center; gap:6px; color:inherit; text-decoration:none; }
+.creator-corner .creator-btn{ border:1px solid rgba(var(--accent),.38); border-radius:999px; padding:7px 12px; background:rgba(var(--accent),.08); color:inherit; font:inherit; font-size:11px; font-weight:700; cursor:pointer; transition:transform .18s ease, background .18s ease, opacity .18s ease; }
+.creator-corner .creator-btn:hover,.creator-corner .creator-btn:focus-visible{ background:rgba(var(--accent),.16); opacity:1; transform:translateY(-1px); }
+.creator-corner .creator-btn:active{ transform:scale(.97); }
 .settings-block h3{ margin:0 0 4px; font-size:15px; font-weight:700; opacity:0.85; display:flex; align-items:baseline; justify-content:space-between; gap:8px;}
 .settings-block h3 .sec-note{ font-weight:500; opacity:0.6; font-size:12px; display:block; margin-top:2px; }
 .settings-block h3 .current-val{ font-size:12px; font-weight:700; opacity:0.55; text-transform:none; letter-spacing:0; white-space:nowrap; }
@@ -1888,6 +1894,14 @@ body.ui-normal .card{background:rgb(24,25,28) !important;border:1px solid rgba(2
         <button class="util-btn" id="importBtn" style="margin-top:2px;">⬆️ Import data from file</button>
         <button class="util-btn danger" id="resetBtn">🗑️ Reset all data</button>
       </div>
+    </div>
+
+    <!-- Kept at the end of Settings as a small discovery for people who explore the app. -->
+    <div class="creator-corner" aria-label="Creator link">
+      <p>Made with care for students ✨</p>
+      <a href="https://portfolio-beta-gilt-29.vercel.app" target="_blank" rel="noopener noreferrer" aria-label="Support the creator by visiting the portfolio">
+        <span class="creator-btn">☕ Support the creator</span>
+      </a>
     </div>
   </div>
 
