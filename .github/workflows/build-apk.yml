@@ -42,7 +42,12 @@ jobs:
         run: npx cap add android
 
       - name: Configure Firebase Android OAuth
-        run: cp google-services.json android/app/google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          test -n "$GOOGLE_SERVICES_JSON" || { echo "Missing GOOGLE_SERVICES_JSON repository secret"; exit 1; }
+          printf '%s' "$GOOGLE_SERVICES_JSON" > google-services.json
+          cp google-services.json android/app/google-services.json
 
       - name: Apply native patches (widget, permissions, icon)
         run: python scripts/patch_android.py

@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-<title>Classmark</title>
+<title>Classmark — Attendance, made clear</title>
+<meta name="description" content="Track class attendance, see your percentage, and know how many classes you can miss or need to attend to reach your target.">
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ff6e6e">
@@ -1292,6 +1293,32 @@ body.ui-normal .cloud-auth-form input,body.ui-normal .phone-auth-fields input,bo
 body.ui-normal .setting-row,body.ui-normal .export-row,body.ui-normal .reorder-row{
   background:var(--surface-soft-color,#232730);color:var(--heading-color,#f0f2f6);border-color:var(--surface-border-color,#303641);
 }
+
+/* Matte and Normal are opaque styles: give the page its own readable surface so
+   the global tone background cannot turn the whole interface black. */
+body.ui-matte.tone-light,body.ui-matte.tone-light .app,
+body.ui-normal.tone-light,body.ui-normal.tone-light .app{
+  background:#f5f7fa;color:#202938;
+}
+body.ui-matte.tone-dark,body.ui-matte.tone-dark .app{
+  background:#202329;color:#eceff5;
+}
+body.ui-normal.tone-dark,body.ui-normal.tone-dark .app{
+  background:#121419;color:#eceff5;
+}
+body.ui-matte.tone-light .card,body.ui-normal.tone-light .card,
+body.ui-matte.tone-light .sheet,body.ui-normal.tone-light .sheet,
+body.ui-matte.tone-light .settings-group .settings-block,
+body.ui-normal.tone-light .settings-group .settings-block{
+  color:#202938;background:#fff;border-color:#e6eaf0;
+}
+body.ui-matte.tone-dark .card,body.ui-normal.tone-dark .card,
+body.ui-matte.tone-dark .sheet,body.ui-normal.tone-dark .sheet,
+body.ui-matte.tone-dark .settings-group .settings-block{
+  color:#eceff5;background:#1b1e25;border-color:#303641;
+}
+body.ui-normal.tone-dark .card,body.ui-normal.tone-dark .sheet,
+body.ui-normal.tone-dark .settings-group .settings-block{background:#181a1f;}
 
 /* Skeuomorphic: the same tactile shadow language extends to controls and sheets. */
 body.ui-skeu .app{background:transparent;}
@@ -2978,7 +3005,7 @@ function renderSubjects(){
     list.innerHTML = `<div class="card empty-state">
       <div class="ei">📚</div>
       <h3>No subjects yet</h3>
-      <p>Add your first subject and start swiping to track attendance — left for present, right for absent.</p>
+      <p>Add a subject, then mark each class as <b>Present</b> or <b>Absent</b>. Classmark will show your percentage and tell you what to do next.</p>
       <button class="btn btn-primary" id="emptyAddBtn" style="width:auto;">Add a subject</button>
     </div>`;
     const btn = document.getElementById('emptyAddBtn');
