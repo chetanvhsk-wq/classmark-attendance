@@ -4,7 +4,9 @@
 
 # Classmark
 
-**A local-first attendance tracker for students — available as a PWA and an Android app.**
+**Know where your attendance stands — and what to do next.**
+
+Classmark is a simple attendance tracker for students. Add your subjects, mark each class as present or absent, and instantly see whether you are above your target — including how many classes you can safely miss or need to attend.
 
 It answers one question: *how many classes can I skip, or how many do I need to attend, to stay above my target?*
 
@@ -32,9 +34,34 @@ It answers one question: *how many classes can I skip, or how many do I need to 
 | Understand the fixes | [Problems overcome](problems.md) |
 | Run locally | [Run Locally](#run-locally) |
 
-Classmark is a local-first attendance tracker with optional Firebase sync. You can use it in the browser without an account; sign-in enables syncing across devices.
+Classmark is local-first, so it works without an account and your data remains available on the device. Sign in only when you want your attendance to sync across devices.
 
 > **One account, every device:** Sign up once with Google or email/password and use that same account anywhere. Google-created accounts can also be given an email/password login from Firebase, so email/password remains a backup if Google sign-in is unavailable. Attendance, timetable, preferences, and other synced changes are reflected across every device signed in to the same account.
+
+## How to use it
+
+1. **Add your subjects** — enter each subject and your target attendance percentage (for example, 75%). You can also add attendance you recorded before using Classmark.
+2. **Mark each class** — tap **Present** or **Absent** after class. You can choose another date when entering older attendance.
+3. **Follow the guidance** — each subject shows your current percentage and the practical next step: how many classes you may skip or how many you need to attend to reach your target.
+
+You can edit mistakes, review attendance by day, and open **Stats** for trends and a longer-term activity view. Use **Settings** to change the appearance, set reminders, import or export a backup, and optionally sign in for sync.
+
+### What the labels mean
+
+| Label | Meaning |
+|---|---|
+| **Present** | You attended the class |
+| **Absent** | You missed the class |
+| **Target** | The minimum percentage you want to maintain |
+| **On track** | Your current percentage is at or above your target |
+| **Need to attend** | The number of future classes to attend in a row to reach your target |
+| **Can skip** | The number of future classes you can miss while staying at or above your target |
+
+> **Privacy note:** Attendance data stays on your device unless you choose to sign in and enable sync. Timetable photos and wallpapers stay on-device even when sync is enabled.
+
+## Why it is useful
+
+Most attendance apps only show a percentage. Classmark turns that percentage into a clear decision: **am I safe to miss the next class, or do I need to attend?** It is designed for quick updates between classes, with detailed history available when you need to check your records.
 
 ## Origin
 
@@ -118,6 +145,8 @@ cd android && ./gradlew assembleDebug
 
 Output: `android/app/build/outputs/apk/debug/app-debug.apk`
 
+The Android Firebase config is intentionally not committed. For local Android builds, download `google-services.json` from Firebase and place it at the repository root. For GitHub Actions, add the complete file contents as a repository secret named `GOOGLE_SERVICES_JSON`; the workflow writes it only during the build.
+
 ### Deploy to Vercel
 
 Point Vercel at the repository root. It runs `npm run vendor` and publishes `www/`. Gemini proxying runs through the serverless functions in `api/` — they read `GEMINI_API_KEY` from your Vercel Production/Preview environment.
@@ -132,6 +161,7 @@ Add your `*.vercel.app` hostname to **Firebase Authentication → Settings → A
 - The Gemini API key is read server-side only — `.env` locally, Vercel environment in production. Never sent to the browser or written to Firestore.
 - Timetable photos and wallpaper images stay on-device.
 - The Firebase web config includes a public Firebase API key — that's not a secret. Don't put private Gemini keys anywhere in source.
+- The Android Firebase config is kept out of Git. Restrict its API key to the `com.attendance.app` Android package and the signing certificate SHA-1 in Google Cloud Console.
 - No analytics. Google Fonts falls back to system fonts offline. Export libraries and the Firebase SDK are pre-bundled into `www/vendor` at install time — never fetched from a CDN at runtime.
 - Exported backups are user-initiated files — treat them as personal data.
 
