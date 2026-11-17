@@ -2,6 +2,7 @@ node_modules/
 .env
 .env.*
 !.env.example
+google-services.json
 android/
 __pycache__/
 *.pyc
