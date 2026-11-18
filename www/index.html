@@ -2080,13 +2080,15 @@ body.ui-matte .card::before,body.ui-normal .card::before,body.ui-matte .card::af
 <div class="overlay" id="editOverlay">
   <div class="sheet card">
     <h3>Edit subject</h3>
-    <input type="text" id="editSubjectName" placeholder="Subject name">
+    <input type="text" id="editSubjectName" placeholder="Subject name" aria-describedby="editNameError">
+    <div class="field-error" id="editNameError" role="alert" style="display:none;">Name is required</div>
     <input type="number" id="editSubjectTarget" placeholder="Target attendance %" min="1" max="99" step="1" inputmode="numeric">
     <div class="setting-label" style="margin-top:2px;"><span>Classes attended / total classes</span></div>
     <div style="display:flex; gap:10px; margin-bottom:12px;">
       <input type="number" id="editPresentCount" placeholder="Present" min="0" style="margin-bottom:0;">
       <input type="number" id="editTotalCount" placeholder="Total" min="0" style="margin-bottom:0;">
     </div>
+    <div class="field-error" id="editCountsError" role="alert" style="display:none;">Attended can't exceed total</div>
     <p style="font-size:12px; opacity:0.5; margin:-4px 0 14px; line-height:1.4;">Adjusts your counts directly — useful if a class wasn't logged or a mistake needs correcting. New swipes/marks still add on top of this.</p>
     <div class="setting-label" style="margin-top:2px;"><span>Set specific dates</span></div>
     <p style="font-size:12px; opacity:0.5; margin:-2px 0 10px; line-height:1.4;">Tap a date to cycle it: blank → present → absent → blank.</p>
@@ -2198,6 +2200,7 @@ body.ui-matte .card::before,body.ui-normal .card::before,body.ui-matte .card::af
     <div class="onb-step"><span class="oi2">👉</span><span>Swipe a subject card <b>left</b> to mark present, <b>right</b> to mark absent. Buttons work too.</span></div>
     <div class="onb-step"><span class="oi2">↩️</span><span>Tap <b>Undo</b> right after if you mark by mistake — or tap a card anytime to edit past entries.</span></div>
     <div class="onb-step"><span class="oi2">📊</span><span>Home shows how many classes you can miss (or need to attend) to hit your target — that's the number that matters.</span></div>
+    <div class="onb-step"><span class="oi2">📋</span><span>Have several courses already? Use <b>Paste from your college portal</b> on the empty Home screen to import them in seconds.</span></div>
     <button class="btn btn-primary" id="onbDismiss" style="width:100%; margin-top:8px;">Got it</button>
   </div>
 </div>
@@ -2931,6 +2934,13 @@ function setActiveView(index, {animateLens=true} = {}){
   activeNavIndex = index;
   if(animateLens) moveLens(index);
 }
+function openPortalImport(){
+  setActiveView(navItems.findIndex(item=>item.dataset.view==='others'));
+  const group = document.getElementById('aiGroup');
+  if(group) group.scrollIntoView({behavior:'smooth', block:'center'});
+  const input = document.getElementById('aiPageText');
+  if(input) input.focus();
+}
 navItems.forEach((item, index)=>{
   item.onclick = ()=>{ if(navDragMoved) { navDragMoved = false; return; } setActiveView(index); };
 });
@@ -3090,10 +3100,15 @@ function renderSubjects(){
       <div class="ei">📚</div>
       <h3>No subjects yet</h3>
       <p>Add a subject, then mark each class as <b>Present</b> or <b>Absent</b>. Classmark will show your percentage and tell you what to do next.</p>
-      <button class="btn btn-primary" id="emptyAddBtn" style="width:auto;">Add a subject</button>
+      <div class="ai-row" style="justify-content:center;">
+        <button class="btn btn-primary" id="emptyAddBtn" style="width:auto;">Add a subject</button>
+        <button class="btn btn-secondary" id="emptyPortalBtn" style="width:auto;">Paste from your college portal</button>
+      </div>
     </div>`;
     const btn = document.getElementById('emptyAddBtn');
     if(btn) btn.onclick = openAddOverlay;
+    const portalBtn = document.getElementById('emptyPortalBtn');
+    if(portalBtn) portalBtn.onclick = openPortalImport;
     return;
   }
   state.subjects.forEach(s=>{
@@ -3146,6 +3161,12 @@ function renderSubjects(){
     });
     attachSwipe(card, s.id);
   });
+  const addRow = document.createElement('div');
+  addRow.className = 'card';
+  addRow.style.cssText = 'grid-column:1/-1;display:flex;justify-content:center;margin-top:4px;';
+  addRow.innerHTML = '<button class="btn btn-secondary" type="button">＋ Add subject</button>';
+  addRow.querySelector('button').onclick = openAddOverlay;
+  list.appendChild(addRow);
   bindSpecularToAllCards();
 }
 
@@ -3379,6 +3400,22 @@ function openEditSheet(id){
   stackPush('editOverlay', ()=>{ document.getElementById('editOverlay').classList.remove('open'); editingId = null; renderAll(); });
   haptic(H.open);
 }
+function validateEditForm(){
+  const name = document.getElementById('editSubjectName').value.trim();
+  const presentRaw = document.getElementById('editPresentCount').value;
+  const totalRaw = document.getElementById('editTotalCount').value;
+  const present = presentRaw === '' ? 0 : Number(presentRaw);
+  const total = totalRaw === '' ? 0 : Number(totalRaw);
+  const nameError = document.getElementById('editNameError');
+  const countsError = document.getElementById('editCountsError');
+  const invalidCounts = !Number.isInteger(present) || !Number.isInteger(total) || present < 0 || total < 0 || present > total;
+  nameError.style.display = name ? 'none' : 'block';
+  countsError.style.display = present > total ? 'block' : 'none';
+  const valid = !!name && !invalidCounts;
+  document.getElementById('confirmEdit').disabled = !valid;
+  return valid;
+}
+['editSubjectName','editPresentCount','editTotalCount'].forEach(id=>document.getElementById(id).addEventListener('input', validateEditForm));
 let editCalMonth = new Date();
 function ymdKey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function buildEditCalendar(){
@@ -3420,6 +3457,7 @@ function buildEditCalendar(){
         buildEditCalendar();
         document.getElementById('editPresentCount').value = totals(s).present;
         document.getElementById('editTotalCount').value = totals(s).total;
+        validateEditForm();
         haptic(H.sliderTick);
       };
     }
@@ -3437,14 +3475,14 @@ document.getElementById('cancelEdit').onclick = ()=>{ document.getElementById('e
 document.getElementById('confirmEdit').onclick = ()=>{
   const s = state.subjects.find(x=>x.id===editingId); if(!s) return;
   const name = document.getElementById('editSubjectName').value.trim();
-  if(!name){ alert('Subject name can\'t be empty.'); return; }
+  if(!validateEditForm()) return;
   const target = clampTarget(document.getElementById('editSubjectTarget').value, s.target);
 
   const vals = flatVals(s);
   const recordPresent = vals.filter(v=>v==='present').length;
   const recordTotal = vals.length;
   const newPresent = Math.max(0, parseInt(document.getElementById('editPresentCount').value) || 0, recordPresent);
-  const newTotal = Math.max(0, parseInt(document.getElementById('editTotalCount').value) || 0, recordTotal, newPresent);
+  const newTotal = Math.max(0, parseInt(document.getElementById('editTotalCount').value) || 0, recordTotal);
 
   const oldName=s.name;
   s.name = name;
@@ -4092,7 +4130,7 @@ requestAnimationFrame(()=> moveLens(0));
       if(practical&&!/\(\s*p\s*\)$/i.test(name)) name+=' (P)';
       return {name,code,present,absent,total,appName:null};
     };
-    const headerAt=lines.findIndex(line=>/course\s*name/i.test(line)&&/present/i.test(line)&&/absent/i.test(line));
+    const headerAt=lines.findIndex(line=>/(?:course\s*name|subject)/i.test(line)&&/(?:present|attended)/i.test(line)&&/(?:absent|total)/i.test(line));
     const items=[];
     if(headerAt>=0&&lines[headerAt].includes('\t')){
       const heads=lines[headerAt].split('\t').map(headerKey);
@@ -4101,11 +4139,14 @@ requestAnimationFrame(()=> moveLens(0));
       const nameI=find(['coursename','subjectname','subject']);
       const presentI=find(['presentcount','attendedcount','classesattended','attendedclasses','present']);
       const absentI=find(['absentcount','classesabsent','absentclasses','absent']);
-      if(nameI>=0&&presentI>=0&&absentI>=0){
+      const totalI=find(['totalcount','totalclasses','classesheld','total']);
+      if(nameI>=0&&presentI>=0&&(absentI>=0||totalI>=0)){
         for(const line of lines.slice(headerAt+1)){
           if(/^(?:support|powered by|sr\.?\s*no)/i.test(line)) continue;
           const cells=line.split('\t');
-          const item=finish(codeI>=0?cells[codeI]:'',cells[nameI],cells[presentI],cells[absentI]);
+          const total=cells[totalI];
+          const absent=absentI>=0?cells[absentI]:(Number(total)-Number(cells[presentI]));
+          const item=finish(codeI>=0?cells[codeI]:'',cells[nameI],cells[presentI],absent);
           if(item) items.push(item);
         }
       }
@@ -4226,15 +4267,27 @@ ${sourceText}`;
     const tableHeader=/course\s*name/i.test(text)&&/present/i.test(text)&&/absent/i.test(text);
     const expectedRows=lines.filter(line=>/^\d+\s*\t/.test(line)&&!/^\d+\s*\t?(?:total|grand\s*total)/i.test(line)).length;
     const complex=!!attendanceImage||!items.length||(!tableHeader&&text.length>300)||(expectedRows>0&&items.length<expectedRows);
-    if(complex&&await checkGemini()){
+    if(complex&&await checkGemini() && (attendanceImage || confirm('This table is not recognized locally. Send it to Gemini for optional AI reading?'))){
       showToast(attendanceImage?'Reading attendance screenshot with Gemini…':'Reading complex attendance table with Gemini…');
       try{
         const parts=[{text:attendanceImage?'Extract attendance from this screenshot.':'Extract attendance from this text:\n'+text.slice(0,30000)}];
         if(attendanceImage){const imageParts=attendanceImage.split(',');const mime=(imageParts[0].match(/data:([^;]+)/)||[])[1]||'image/jpeg';parts.push({inline_data:{mime_type:mime,data:imageParts[1]}});}
-        const aiItems=await analyse(parts);
+        let aiItems;
+        try { aiItems=await analyse(parts); }
+        catch(firstError){
+          showToast('Gemini is busy — retrying once…');
+          aiItems=await analyse(parts);
+        }
         items=aiItems.map(x=>({name:x.appName||x.erpName,code:x.code||'',present:x.present,absent:x.absent,total:x.present+x.absent,appName:x.appName}));
       }catch(e){
-        if(!items.length){ showToast(e.message||'AI analysis failed'); return; }
+        if(!items.length){
+          $('aiPreviewTitle').textContent='Could not read this table';
+          $('aiPreviewRows').innerHTML='<p class="h3-sub">Classmark could not read the portal table right now. You can add the subjects manually instead.</p><button class="util-btn" type="button" id="aiAddManuallyBtn">Add manually</button>';
+          $('aiPreview').style.display='block';
+          $('aiAddManuallyBtn').onclick=()=>openAddOverlay();
+          showToast('Classmark could not finish the import');
+          return;
+        }
         showToast('Gemini could not finish; showing locally recognized rows for review');
       }
     }else if(attendanceImage){
