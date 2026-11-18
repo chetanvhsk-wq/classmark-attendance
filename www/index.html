@@ -2811,11 +2811,17 @@ document.getElementById('resetBtn').onclick = ()=>{
 };
 
 /* ---------- Reminders ---------- */
-document.getElementById('reminderOffChip').onclick = ()=>{ settings.reminderEnabled = false; settings.reminderUserDisabled=true; save(); applySettings(); haptic(H.toggle); };
+function refreshReminderSchedule(){
+  if(typeof window.pushWidgetSync === 'function') window.pushWidgetSync();
+  else if(typeof checkReminder === 'function') checkReminder();
+}
+document.getElementById('reminderOffChip').onclick = ()=>{ settings.reminderEnabled = false; settings.reminderUserDisabled=true; save(); applySettings(); refreshReminderSchedule(); haptic(H.toggle); };
 document.getElementById('reminderOnChip').onclick = ()=>{
   if(!(settings.weeklyTimetable||[]).length){ showToast('Add your weekly timetable first'); document.getElementById('timetableGroup').scrollIntoView({behavior:'smooth',block:'center'}); return; }
-  settings.reminderEnabled = true; settings.reminderUserDisabled=false; save(); applySettings(); haptic(H.toggle);
-  if(!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) && 'Notification' in window && Notification.permission === 'default'){ Notification.requestPermission(); }
+  settings.reminderEnabled = true; settings.reminderUserDisabled=false; settings.lastReminderFired=null; save(); applySettings(); refreshReminderSchedule(); haptic(H.toggle);
+  if(!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) && 'Notification' in window && Notification.permission === 'default'){
+    Notification.requestPermission().then(()=>checkReminder()).catch(()=>{});
+  }
 };
 (function(){
   const btn=document.getElementById('reminderTimeBtn'), ov=document.getElementById('timePickerOverlay');
@@ -2835,7 +2841,7 @@ document.getElementById('reminderOnChip').onclick = ()=>{
   document.getElementById('tpCancel').onclick=close;
   document.getElementById('tpSave').onclick=()=>{
     settings.reminderTime=String(val(hc)).padStart(2,'0')+':'+String(val(mc)).padStart(2,'0');
-    save(); applySettings(); haptic(H.select); close();
+    settings.lastReminderFired=null; save(); applySettings(); refreshReminderSchedule(); haptic(H.select); close();
   };
 })();
 
@@ -2864,11 +2870,11 @@ function checkReminder(){
   const progress=scheduleProgressForDate(now);
   if(!progress.scheduled) return;
   if(progress.complete){ settings.lastReminderFired = todayStr(); save(); return; }
-  settings.lastReminderFired = todayStr(); save();
   const missing=progress.missing.map(x=>x.count>1?`${x.name} (${x.count})`:x.name).join(', ');
   if('Notification' in window && Notification.permission === 'granted'){
-    try{ new Notification('Classmark', { body: `Remember to mark today’s classes: ${missing}`, icon:'icon-192.png' }); }catch(e){}
+    try{ new Notification('Classmark', { body: `Remember to mark today’s classes: ${missing}`, icon:'icon-192.png' }); settings.lastReminderFired = todayStr(); save(); }catch(e){}
   } else {
+    settings.lastReminderFired = todayStr(); save();
     showToast(`Remember to mark: ${missing}`);
   }
 }
@@ -4306,14 +4312,15 @@ ${sourceText}`;
   function enableReminderAfterSchedule(){
     if(settings.reminderUserDisabled) return;
     settings.reminderEnabled=true; settings.lastReminderFired=null;
-    if(!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())&&'Notification' in window&&Notification.permission==='default') Notification.requestPermission();
+    refreshReminderSchedule();
+    if(!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())&&'Notification' in window&&Notification.permission==='default') Notification.requestPermission().catch(()=>{});
   }
   $('timetableAddBtn').onclick=()=>{
     const subject=$('timetableSubject').value.trim(), day=Number($('timetableDay').value);
     if(!subject){ showToast('Enter a course name'); $('timetableSubject').focus(); return; }
     ensureSubject(subject);
     settings.weeklyTimetable.push({day,subject});
-    enableReminderAfterSchedule(); save(); renderAll(); renderTimetable(); applySettings();
+    enableReminderAfterSchedule(); save(); renderAll(); renderTimetable(); applySettings(); refreshReminderSchedule();
     $('timetableSubject').value='';
     showToast(settings.reminderEnabled?'Class added · 7:00 PM reminders enabled':'Class added · reminders are off');
   };
@@ -4377,7 +4384,7 @@ ${sourceText}`;
     entries.forEach(x=>ensureSubject(x.subject));
     settings.weeklyTimetable=entries;
     enableReminderAfterSchedule();
-    save(); renderAll(); renderTimetable(); applySettings();
+    save(); renderAll(); renderTimetable(); applySettings(); refreshReminderSchedule();
     pendingSchedule=[]; $('timetableImportPreview').style.display='none';
     showToast(settings.reminderEnabled?`Timetable saved · ${entries.length} classes · 7:00 PM reminders enabled`:`Timetable saved · ${entries.length} classes · reminders are off`);
   };
