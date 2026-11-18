@@ -1575,6 +1575,56 @@ body.ui-normal .card{background:rgb(24,25,28) !important;border:1px solid rgba(2
 #fontStyleRow [data-font="serif"]{font-family:"Lora",Georgia,serif !important;}
 #fontStyleRow [data-font="squared"]{font-family:"Space Mono",monospace !important;}
 
+/* Final surface pass: glass has a living, frosted reflection; matte/normal stay
+   opaque and readable in both tones instead of inheriting the dark glass base. */
+body.ui-glass .card,
+body.ui-glass .settings-group .settings-block,
+body.ui-glass .sheet,
+body.ui-glass .timetable-row,
+body.ui-glass .timetable-photo-wrap,
+body.ui-glass .ai-preview,
+body.ui-glass .navbar-inner{
+  background:
+    radial-gradient(380px 220px at var(--glass-x,18%) var(--glass-y,8%), rgba(255,255,255,.22), transparent 68%),
+    linear-gradient(145deg, rgba(255,255,255,.18), rgba(255,255,255,.055)) !important;
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.65) contrast(1.04);
+  backdrop-filter:blur(var(--glass-blur)) saturate(1.65) contrast(1.04);
+  transition:background-position 700ms ease, box-shadow 240ms ease, transform 240ms ease;
+}
+body.ui-glass.tone-light .card,
+body.ui-glass.tone-light .settings-group .settings-block,
+body.ui-glass.tone-light .sheet,
+body.ui-glass.tone-light .timetable-row,
+body.ui-glass.tone-light .timetable-photo-wrap,
+body.ui-glass.tone-light .ai-preview,
+body.ui-glass.tone-light .navbar-inner{
+  background:
+    radial-gradient(420px 240px at var(--glass-x,18%) var(--glass-y,8%), rgba(255,255,255,.72), transparent 70%),
+    linear-gradient(145deg, rgba(255,255,255,.78), rgba(235,243,252,.5)) !important;
+  border-color:rgba(255,255,255,.78) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 16px 34px -24px rgba(42,58,82,.32) !important;
+}
+body.ui-glass .card::after,
+body.ui-glass .navbar-inner::after{
+  content:""; position:absolute; inset:-35%; pointer-events:none; border-radius:inherit;
+  background:linear-gradient(115deg, transparent 38%, rgba(255,255,255,.14) 49%, transparent 60%);
+  transform:translateX(var(--glass-shift, -12%)) rotate(-8deg);
+  animation:glassSheen 9s ease-in-out infinite alternate;
+  opacity:.7;
+}
+@keyframes glassSheen{from{transform:translateX(-18%) rotate(-8deg)}to{transform:translateX(18%) rotate(-8deg)}}
+@media (prefers-reduced-motion:reduce){body.ui-glass .card::after,body.ui-glass .navbar-inner::after{animation:none;display:none;}}
+
+body.ui-matte.tone-light .card,body.ui-matte.tone-light .sheet,
+body.ui-matte.tone-light .settings-group .settings-block{background:#fff !important;color:#202938 !important;border-color:#dfe4ec !important;}
+body.ui-normal.tone-light .card,body.ui-normal.tone-light .sheet,
+body.ui-normal.tone-light .settings-group .settings-block{background:#fff !important;color:#202938 !important;border-color:#dfe4ec !important;}
+body.ui-matte.tone-dark .card,body.ui-matte.tone-dark .sheet,
+body.ui-matte.tone-dark .settings-group .settings-block{background:#202329 !important;color:#eceff5 !important;border-color:#303641 !important;}
+body.ui-normal.tone-dark .card,body.ui-normal.tone-dark .sheet,
+body.ui-normal.tone-dark .settings-group .settings-block{background:#181a1f !important;color:#eceff5 !important;border-color:#303641 !important;}
+body.ui-matte .card::before,body.ui-normal .card::before,body.ui-matte .card::after,body.ui-normal .card::after{display:none !important;}
+
 </style>
 </head>
 <body>
@@ -2396,6 +2446,20 @@ function attachSpecular(el){
   });
 }
 function bindSpecularToAllCards(){ document.querySelectorAll('.card').forEach(attachSpecular); }
+
+/* Give glass a gentle, device-friendly sense of depth even when nothing is hovered. */
+let glassMotionFrame = 0;
+window.addEventListener('pointermove', e=>{
+  if(!document.body.classList.contains('ui-glass') || glassMotionFrame) return;
+  glassMotionFrame = requestAnimationFrame(()=>{
+    const x = Math.round((e.clientX / Math.max(1, innerWidth)) * 100);
+    const y = Math.round((e.clientY / Math.max(1, innerHeight)) * 100);
+    document.documentElement.style.setProperty('--glass-x', x + '%');
+    document.documentElement.style.setProperty('--glass-y', y + '%');
+    document.documentElement.style.setProperty('--glass-shift', ((x - 50) * .35).toFixed(1) + '%');
+    glassMotionFrame = 0;
+  });
+},{passive:true});
 
 function applySettings(){
   document.body.className = 'ui-' + settings.ui + ' tone-' + settings.skeuTone + ' font-' + (settings.fontStyle || 'default');
