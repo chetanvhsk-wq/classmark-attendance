@@ -794,9 +794,19 @@ button{ touch-action:manipulation; }
 .home-editable{cursor:pointer;}
 .home-editable:active{transform:scale(.98);}
 .home-glyph-tile{display:flex;align-items:center;justify-content:center;min-height:92px;overflow:hidden;}
-.home-glyph-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;width:78%;max-width:180px;}
+.home-glyph-grid,.glyph-editor-grid{display:grid;grid-template-columns:repeat(20,1fr);grid-template-rows:repeat(10,1fr);gap:2px;width:100%;max-width:220px;}
 .home-glyph-dot{aspect-ratio:1;border-radius:50%;background:rgba(var(--accent),.14);transition:transform .18s ease,background .18s ease,box-shadow .18s ease;}
-.home-glyph-dot.on{background:rgb(var(--accent));box-shadow:0 0 8px rgba(var(--accent),.65);transform:scale(1.12);}
+.home-glyph-dot.on{background:var(--glyph-color,rgb(var(--accent)));box-shadow:0 0 8px var(--glyph-color,rgb(var(--accent)));transform:scale(1.12);}
+.glyph-editor-panel{padding:12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);}
+.glyph-editor-dot{aspect-ratio:1;border-radius:50%;background:rgba(var(--accent),.12);cursor:pointer;}
+.glyph-editor-dot.on{background:var(--glyph-color,rgb(var(--accent)));box-shadow:0 0 5px var(--glyph-color,rgb(var(--accent)));}
+.glyph-preset-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 14px;}
+.glyph-preset{padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:12px;cursor:pointer;text-align:center;font-weight:700;font-size:12px;}
+.glyph-preset.active{border-color:rgb(var(--accent));background:rgba(var(--accent),.12);}
+.glyph-color-row{display:flex;gap:9px;flex-wrap:wrap;margin:10px 0 14px;}
+.glyph-color-chip{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;}
+.glyph-color-chip.active{border-color:#fff;box-shadow:0 0 0 2px rgb(var(--accent));}
+.glyph-editor-actions{display:flex;justify-content:flex-end;margin-top:8px;}
 @media (max-width:360px){
   .app{padding-left:12px;padding-right:12px;}
   .subject-card{padding-left:14px;padding-right:14px;}
@@ -2021,6 +2031,24 @@ body.ui-matte .card::before,body.ui-normal .card::before,body.ui-matte .card::af
       <div class="mode-chip" id="homeCardEnabledChip" tabindex="0">Enabled</div>
       <div class="mode-chip" id="homeCardDisabledChip" tabindex="0">Disabled</div>
     </div>
+    <div id="glyphEditorControls" style="display:none;">
+      <div class="setting-label">Glyph style</div>
+      <div class="glyph-preset-grid" id="glyphPresetGrid"></div>
+      <div class="setting-label">Glyph color</div>
+      <div class="glyph-color-row" id="glyphColorRow"></div>
+      <div id="glyphTextControls" style="display:none;">
+        <input type="text" id="glyphTextInput" maxlength="6" placeholder="Text or initials">
+        <div class="style-row" id="glyphTextStyleRow">
+          <button type="button" class="style-chip" data-glyph-style="block">Block</button>
+          <button type="button" class="style-chip" data-glyph-style="dot">Dot</button>
+          <button type="button" class="style-chip" data-glyph-style="outline">Outline</button>
+        </div>
+      </div>
+      <div id="glyphCustomControls" style="display:none;">
+        <div class="glyph-editor-panel"><div class="glyph-editor-grid" id="glyphEditorGrid"></div></div>
+        <div class="glyph-editor-actions"><button class="util-btn" type="button" id="glyphEditorClear">Clear</button></div>
+      </div>
+    </div>
     <div class="sheet-actions">
       <button class="btn btn-secondary" id="cancelHomeCardEdit">Cancel</button>
       <button class="btn btn-primary" id="saveHomeCardEdit">Save</button>
@@ -3225,18 +3253,27 @@ function renderSubjects(){
 }
 
 let editingHomeCard = null;
+const glyphColors=['accent','#7aa2ff','#ba78ff','#6edc96','#ff9f5a','#ff78aa','#ff6e6e','#5ad1d1'];
+const glyphPresetNames=[['streak','Streak'],['heart','Heart'],['star','Star'],['smile','Smile'],['wave','Wave'],['checker','Checker'],['text','Text'],['custom','Custom']];
+const glyphTextMap={A:['01110','10001','10001','11111','10001','10001','10001'],B:['11110','10001','10001','11110','10001','10001','11110'],C:['01111','10000','10000','10000','10000','10000','01111'],E:['11111','10000','10000','11110','10000','10000','11111'],M:['10001','11011','10101','10101','10001','10001','10001'],S:['01111','10000','10000','01110','00001','00001','11110']};
+function glyphLitSet(preset,frame=0){const set=new Set(),add=(x,y)=>{if(x>=0&&x<20&&y>=0&&y<10)set.add(y*20+x);};if(preset==='streak')for(let y=0;y<10;y++){add((y+frame)%20,y);add((19-y+frame)%20,y);}if(preset==='heart')['01100110','11111111','11111111','01111110','00111100','00011000'].forEach((r,y)=>[...r].forEach((v,x)=>v==='1'&&add(x+6,y+2)));if(preset==='star'){for(let i=0;i<20;i++){add(i,4);add(9,Math.floor(i/2));}[[8,3],[10,3],[7,2],[11,2],[6,1],[12,1]].forEach(([x,y])=>add(x,y));}if(preset==='smile'){for(let x=5;x<15;x++){add(x,1);add(x,8);}for(let y=2;y<8;y++){add(4,y);add(15,y);}add(7,4);add(12,4);for(let x=7;x<13;x++)add(x,6);}if(preset==='wave')for(let x=0;x<20;x++)add(x,Math.round(4+2*Math.sin((x+frame)*.7)));if(preset==='checker')for(let y=0;y<10;y++)for(let x=0;x<20;x++)if((x+y+frame)%2===0)add(x,y);if(preset==='text'){let ox=Math.max(0,Math.floor((20-String(settings.glyph.text||'AB').length*6)/2));for(const ch of String(settings.glyph.text||'AB').toUpperCase().slice(0,3)){const rows=glyphTextMap[ch]||glyphTextMap.A;rows.forEach((r,y)=>[...r].forEach((v,x)=>v==='1'&&add(ox+x,y+1)));ox+=6;}}if(preset==='custom')(settings.glyph.customPattern||[]).forEach(i=>add(i%20,Math.floor(i/20)));return set;}
+function renderGlyphGrid(id,editor=false){const grid=document.getElementById(id);if(!grid)return;const lit=glyphLitSet(settings.glyph.preset,settings.glyphFrame||0);grid.style.setProperty('--glyph-color',settings.glyph.color==='accent'?'rgb(var(--accent))':settings.glyph.color);grid.innerHTML=Array.from({length:200},(_,i)=>`<span class="${editor?'glyph-editor-dot':'home-glyph-dot'}${lit.has(i)?' on':''}" data-index="${i}"></span>`).join('');}
+function renderGlyphEditor(){const presets=document.getElementById('glyphPresetGrid');presets.innerHTML=glyphPresetNames.map(([id,label])=>`<div class="glyph-preset${settings.glyph.preset===id?' active':''}" data-glyph-preset="${id}">${label}</div>`).join('');document.querySelectorAll('[data-glyph-preset]').forEach(el=>el.onclick=()=>{settings.glyph.preset=el.dataset.glyphPreset;renderGlyphEditor();renderHomeCards();});document.getElementById('glyphColorRow').innerHTML=glyphColors.map(c=>`<div class="glyph-color-chip${settings.glyph.color===c?' active':''}" data-glyph-color="${c}" style="background:${c==='accent'?'rgb(var(--accent))':c}"></div>`).join('');document.querySelectorAll('[data-glyph-color]').forEach(el=>el.onclick=()=>{settings.glyph.color=el.dataset.glyphColor;renderGlyphEditor();renderHomeCards();});document.getElementById('glyphCustomControls').style.display=settings.glyph.preset==='custom'?'block':'none';document.getElementById('glyphTextControls').style.display=settings.glyph.preset==='text'?'block':'none';document.getElementById('glyphTextInput').value=settings.glyph.text||'';document.querySelectorAll('[data-glyph-style]').forEach(el=>{el.classList.toggle('active',(settings.glyph.textStyle||'block')===el.dataset.glyphStyle);el.onclick=()=>{settings.glyph.textStyle=el.dataset.glyphStyle;renderGlyphEditor();renderHomeCards();};});renderGlyphGrid('glyphEditorGrid',true);document.querySelectorAll('#glyphEditorGrid .glyph-editor-dot').forEach(dot=>dot.onclick=()=>{const i=Number(dot.dataset.index),s=new Set(settings.glyph.customPattern||[]);s.has(i)?s.delete(i):s.add(i);settings.glyph.customPattern=[...s];settings.glyph.preset='custom';renderGlyphEditor();renderHomeCards();});document.getElementById('glyphEditorClear').onclick=()=>{settings.glyph.customPattern=[];renderGlyphEditor();renderHomeCards();};document.getElementById('glyphTextInput').oninput=e=>{settings.glyph.text=e.target.value;renderHomeCards();};}
 function renderHomeCards(){
   const cards = settings.homeCards;
+  const homeGrid=document.querySelector('.stats-grid');
+  let visibleCards=0;
   [['overall','homeCardOverall','overallLabel'],['subjects','homeCardSubjects','subjectsLabel'],['safe','safeSubjectsCard','safeLabel'],['glyph','homeGlyphCard','glyphLabel']].forEach(([key,cardId,labelId])=>{
     const card=document.getElementById(cardId), label=document.getElementById(labelId);
     if(!card) return;
     card.style.display=cards[key].enabled?'':'none';
+    if(cards[key].enabled) visibleCards++;
+    card.style.gridColumn='auto';
     if(label) label.textContent=cards[key].label;
   });
-  const grid=document.getElementById('homeGlyphGrid');
-  if(grid && settings.glyphEnabled){
-    grid.innerHTML=Array.from({length:36},(_,i)=>`<span class="home-glyph-dot${(i%12===Math.floor(i/12)||i%12===11-Math.floor(i/12))?' on':''}"></span>`).join('');
-  }
+  if(homeGrid) homeGrid.style.gridTemplateColumns=visibleCards<=2?`repeat(${Math.max(1,visibleCards)},minmax(0,1fr))`:'';
+  if(!settings.glyph) settings.glyph={preset:'streak',color:'accent',customPattern:[],text:'AB',textStyle:'block'};
+  if(document.getElementById('homeGlyphGrid') && settings.glyphEnabled) renderGlyphGrid('homeGlyphGrid');
   const state=document.getElementById('homeGlyphState'); if(state) state.textContent=settings.glyphEnabled?'On':'Off';
   document.getElementById('homeGlyphOnChip')?.classList.toggle('active',settings.glyphEnabled);
   document.getElementById('homeGlyphOffChip')?.classList.toggle('active',!settings.glyphEnabled);
@@ -3244,7 +3281,10 @@ function renderHomeCards(){
 function openHomeCardEditor(key){
   editingHomeCard=key;
   const cfg=settings.homeCards[key];
+  if(!settings.glyph) settings.glyph={preset:'streak',color:'accent',customPattern:[],text:'AB',textStyle:'block'};
   document.getElementById('homeCardLabelInput').value=cfg.label;
+  document.getElementById('glyphEditorControls').style.display=key==='glyph'?'block':'none';
+  if(key==='glyph') renderGlyphEditor();
   document.getElementById('homeCardEnabledChip').classList.toggle('active',cfg.enabled);
   document.getElementById('homeCardDisabledChip').classList.toggle('active',!cfg.enabled);
   document.getElementById('homeCardEditorOverlay').classList.add('open');
@@ -3277,6 +3317,7 @@ function bindHomeCardEditor(){
   document.getElementById('editHomeGlyphBtn').onclick=()=>openHomeCardEditor('glyph');
 }
 bindHomeCardEditor();
+setInterval(()=>{if(settings.glyph){settings.glyphFrame=(settings.glyphFrame||0)+1;renderHomeCards();}},900);
 
 function addMark(id, status){
   const s = state.subjects.find(x=>x.id===id); if(!s) return;

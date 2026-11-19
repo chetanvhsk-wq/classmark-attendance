@@ -53,6 +53,7 @@ These smaller foundation commits are part of the project history even when they 
 ## November 19, 2026 — Home customization and class entry
 
 - Restored the animated Home Glyph card from the reference deployment.
+- Restored the full Glyph editor: animated presets, color palette, text/initials mode, and custom 20×10 dot drawing with clear/reset.
 - Added an explicit On/Off control for the Glyph card in Settings; the card can also be renamed or hidden from its editor.
 - Made all four Home cards editable: Overall, Subjects, Safe subjects, and Glyph.
 - Restored the persistent floating **Add class** button across the app, while retaining the inline Add subject control below the Home list.

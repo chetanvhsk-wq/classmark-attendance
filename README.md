@@ -90,6 +90,7 @@ That said, what I built goes well beyond a surface-level fork. The original was 
 - Persistent **Add class** button available throughout the app, plus an inline Add subject row below Home subjects
 - Four editable Home cards: rename or hide Overall, Subjects, Safe subjects, and the animated Glyph card
 - Toggle the animated Home Glyph card on or off from Settings; tap it to customize its label and visibility
+- Full Glyph editor with animated presets (streak, heart, star, smile, wave, checker), color choices, text/initials mode, and a custom 20×10 dot canvas
 - Backfill past dates and edit or remove individual marks
 - Stats: trend graph, 84-day heatmap, weekly recap with a shareable image, day log, subject reordering
 - Reminders via Android Local Notifications or Web Notifications in the browser

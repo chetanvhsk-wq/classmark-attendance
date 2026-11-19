@@ -48,7 +48,6 @@ function errorText(error) {
   const code = error?.code || '';
   const rawMessage = String(error?.message || '');
   if (code === 'auth/unauthorized-domain') {
-    if (location.protocol === 'file:') return 'This page is opened from a file. Keep the local server running and open http://localhost:8000/ instead.';
     const host = location.hostname || 'this website';
     return `Add ${host} to Firebase Authentication → Settings → Authorized domains, then reload this page.`;
   }
