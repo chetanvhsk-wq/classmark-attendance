@@ -118,6 +118,8 @@ Times below are repository commit times converted to IST (Asia/Kolkata).
 
 ### Current release state
 
+- Next release target: **Classmark v1.0.6**, generated from the successful Android workflow run after the privacy documentation update.
+
 - Live web app: [classmark-attendance-nexus-9af5.vercel.app](https://classmark-attendance-nexus-9af5.vercel.app/)
 - GitHub release: [Classmark v1.0.0](https://github.com/chetanvhsk-wq/classmark-attendance/releases/tag/v1.0.0)
 - GitHub Package: [classmark-attendance](https://github.com/users/chetanvhsk-wq/packages/npm/package/classmark-attendance)

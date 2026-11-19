@@ -29,7 +29,7 @@ It answers one question: *how many classes can I skip, or how many do I need to 
 | Need | Go to |
 |---|---|
 | Try the app | [Live web app](https://classmark-attendance-nexus-9af5.vercel.app/) |
-| Install Android | [Latest release](https://github.com/chetanvhsk-wq/classmark-attendance/releases/tag/v1.0.1) |
+| Install Android | [Latest release](https://github.com/chetanvhsk-wq/classmark-attendance/releases/tag/v1.0.6) |
 | See what changed | [Updates](updates.md) |
 | Understand the fixes | [Problems overcome](problems.md) |
 | Run locally | [Run Locally](#run-locally) |
