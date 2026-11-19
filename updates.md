@@ -59,6 +59,15 @@ These smaller foundation commits are part of the project history even when they 
 - Restored the persistent floating **Add class** button across the app, while retaining the inline Add subject control below the Home list.
 - Updated the README and changelog to document the restored controls.
 
+## November 19, 2026 — Import reliability and Glass polish
+
+- Added a permanent **Add subject** row below the Home subject list and kept **Add class** available throughout the app.
+- Added a first-screen **Paste from your college portal** entry point for importing multiple subjects.
+- Added inline Edit subject validation for required names and invalid attended/total counts; Save stays disabled until the form is valid.
+- Added local parsing for standard Attended/Total tables before any Gemini fallback, with a consent step before sending data to Gemini.
+- Added one automatic retry for temporary Gemini failures, followed by a clear Classmark error and **Add manually** fallback.
+- Fixed a small horizontal overflow in Glass mode so the page no longer leaves a right-side scroll gap.
+
 ## Interface and visual design
 
 - The persistent floating Add class button is available across the web UI; subject creation also remains available from Home controls.

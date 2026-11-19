@@ -17,6 +17,16 @@ This project evolved from a local attendance prototype into a synced web and And
 - Improved release automation, Android workflow compatibility, Firebase configuration injection, and APK publishing.
 - Added release assets, update history, README links, and reproducible Android builds.
 
+## Work completed on 19 November 2026
+
+- Restored the full animated Glyph editor with presets, colors, text/initials mode, and a custom dot canvas; its Home card can be enabled or disabled and the remaining Home cards reflow into the available space.
+- Made all four Home cards editable and restored persistent Add class access, plus the inline Add subject row below the subject list.
+- Added a visible portal-paste entry point, local Attended/Total table parsing, Gemini consent before fallback processing, and a retry/manual fallback for temporary Gemini errors.
+- Added Edit subject validation so blank names and attended counts above total are shown inline and cannot be saved.
+- Fixed the Glass mode document width so animated surfaces no longer create a visible right-side scroll gap.
+
+The earlier floating-plus removal was a temporary intermediate state; the current UI restores the persistent Add class control and documents it above.
+
 ## Work completed on 18 November 2026
 
 - Fixed class reminder scheduling so changing reminder settings, reminder time, or timetable data reschedules notifications immediately.
