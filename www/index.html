@@ -50,6 +50,7 @@
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
+html{max-width:100%;overflow-x:hidden;}
 body{
   margin:0;
   font-family:var(--font-stack);
@@ -97,10 +98,13 @@ body.font-squared .action-btn, body.font-squared .btn{ font-family:'Space Mono',
 }
 .app{
   max-width:480px;
+  width:100%;
   margin:0 auto;
   padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(200px + env(safe-area-inset-bottom,0px));
   min-height:100vh;
 }
+body.ui-glass{max-width:100%;overflow-x:hidden;}
+body.ui-glass .app{width:100%;max-width:480px;overflow-x:clip;}
 .view{ display:none; }
 .view.active{ display:block; animation:fadeIn var(--duration-med) ease; }
 @keyframes fadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
