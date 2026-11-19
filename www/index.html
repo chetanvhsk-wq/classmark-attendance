@@ -793,6 +793,7 @@ button{ touch-action:manipulation; }
 .action-btn:focus-visible, .today-pill:focus-visible, .nav-item:focus-visible, .fab:focus-visible{ outline-offset:3px; }
 .home-editable{cursor:pointer;}
 .home-editable:active{transform:scale(.98);}
+.stats-grid.home-odd-count > .home-editable:last-child{grid-column:1 / -1;}
 .home-glyph-tile{display:flex;align-items:center;justify-content:center;min-height:92px;overflow:hidden;}
 .home-glyph-grid,.glyph-editor-grid{display:grid;grid-template-columns:repeat(20,1fr);grid-template-rows:repeat(10,1fr);gap:2px;width:100%;max-width:220px;}
 .home-glyph-dot{aspect-ratio:1;border-radius:50%;background:rgba(var(--accent),.14);transition:transform .18s ease,background .18s ease,box-shadow .18s ease;}
@@ -1086,6 +1087,7 @@ body.ui-glass .toast{backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-f
   .toast{bottom:28px;}
   .topbar{margin-bottom:32px;}
   .stats-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .stats-grid.home-odd-count > .home-editable:last-child{grid-column:auto;}
   #safeSubjectsCard{grid-column:auto!important;}
   .stat-card{min-height:116px;display:flex;flex-direction:column;justify-content:center;}
   #safeSubjectsCard{align-items:flex-start;justify-content:center;}
@@ -3271,7 +3273,10 @@ function renderHomeCards(){
     card.style.gridColumn='auto';
     if(label) label.textContent=cards[key].label;
   });
-  if(homeGrid) homeGrid.style.gridTemplateColumns=visibleCards<=2?`repeat(${Math.max(1,visibleCards)},minmax(0,1fr))`:'';
+  if(homeGrid){
+    homeGrid.style.gridTemplateColumns=visibleCards<=2?`repeat(${Math.max(1,visibleCards)},minmax(0,1fr))`:'';
+    homeGrid.classList.toggle('home-odd-count',visibleCards===3);
+  }
   if(!settings.glyph) settings.glyph={preset:'streak',color:'accent',customPattern:[],text:'AB',textStyle:'block'};
   if(document.getElementById('homeGlyphGrid') && settings.glyphEnabled) renderGlyphGrid('homeGlyphGrid');
   const state=document.getElementById('homeGlyphState'); if(state) state.textContent=settings.glyphEnabled?'On':'Off';
