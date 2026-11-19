@@ -37,10 +37,10 @@
 **Reference:** https://developer.android.com/studio/publish/app-signing
 
 ### [PENDING] C3. Publish a privacy policy and implement account deletion
-**What:** No privacy-policy page or account-deletion flow was found in the tracked app files, while the app requires account creation and syncs attendance data to Firestore.
+**What:** The repository now contains a privacy-policy page, in-app policy links, and a signed-in account-deletion action; public deployment and Firebase deletion verification remain pending.
 **Why critical:** Google Play requires a public privacy-policy URL in Play Console and inside the app; account-creation apps must also provide an accessible deletion path that deletes associated user data.
-**Where:** `www/index.html`, `www/firebase-sync.js`, `README.md`
-**How:** Publish a non-editable HTTPS policy covering Firebase Auth, Firestore, Gemini proxy processing, retention, and device-only timetable/photos. Add a signed-in Settings action that deletes the Firebase Auth user and `users/{uid}/sync/workspace`, then link the policy in the app and Play Console.
+**Where:** `www/privacy.html`, `www/index.html`, `www/firebase-sync.js`
+**How:** Deploy and verify the included non-editable HTTPS policy, then confirm the Settings action deletes the Firebase Auth user and `users/{uid}/sync/workspace`. Link the deployed policy URL in Play Console and test recent-login behavior.
 **Reference:** https://support.google.com/googleplay/android-developer/answer/10144311
 
 ### [PENDING] C4. Complete Play Console account and production-access requirements
@@ -58,10 +58,10 @@
 **Reference:** https://firebase.google.com/docs/auth/web/ Google Authentication > Settings > Authorized domains
 
 ### [PENDING] C6. Verify web account deletion and privacy access
-**What:** The same privacy and deletion requirements apply to the browser experience, and no in-app web privacy or account-deletion path was found.
+**What:** The browser now exposes the privacy policy and account-deletion path, but the live HTTPS URL and deletion behavior still need production verification.
 **Why critical:** Web users must be able to review the policy and delete their account without installing the Android app.
-**Where:** `www/index.html`, `www/firebase-sync.js`
-**How:** Add a visible privacy-policy link and account-deletion action to the web Settings/account UI, require reauthentication where Firebase needs it, delete the Firestore workspace, and confirm the user is signed out afterward.
+**Where:** `www/privacy.html`, `www/index.html`, `www/firebase-sync.js`
+**How:** Verify the deployed policy link, exercise Delete account and data in the browser, confirm the Firestore workspace and Firebase Auth user are removed, and confirm the user is signed out afterward.
 **Reference:** https://support.google.com/googleplay/android-developer/answer/10144311
 
 ## HIGH
@@ -201,6 +201,7 @@
 ## Change log
 - 2026-11-19 00:00 IST - Created from Android Go-Live Checklist review.
 - 2026-11-19 00:00 IST - Expanded the checklist to cover the responsive web deployment and browser release path.
+- 2026-11-19 00:00 IST - Added the privacy policy page, in-app links, and account deletion implementation; production verification remains pending.
 
 ## Severity definitions
 - **CRITICAL** - Play Store will reject the app, or the app will not function at launch

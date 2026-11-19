@@ -67,6 +67,7 @@ These smaller foundation commits are part of the project history even when they 
 - Added local parsing for standard Attended/Total tables before any Gemini fallback, with a consent step before sending data to Gemini.
 - Added one automatic retry for temporary Gemini failures, followed by a clear Classmark error and **Add manually** fallback.
 - Fixed a small horizontal overflow in Glass mode so the page no longer leaves a right-side scroll gap.
+- Added a public privacy-policy page, login and Settings links to it, and a signed-in Delete account and data action for the Firebase Auth user and synced workspace.
 
 ## Interface and visual design
 

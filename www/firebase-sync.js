@@ -2,10 +2,10 @@ import { initializeApp, getApps } from 'firebase/app';
 import {
   getAuth, onAuthStateChanged, createUserWithEmailAndPassword,
   signInWithEmailAndPassword, signInWithPopup, signInWithCredential, GoogleAuthProvider,
-  signInWithPhoneNumber, RecaptchaVerifier, signOut,
+  signInWithPhoneNumber, RecaptchaVerifier, signOut, deleteUser,
 } from 'firebase/auth';
 import {
-  getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp,
+  getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp, deleteDoc,
 } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -67,6 +67,7 @@ function errorText(error) {
     'auth/invalid-verification-code':'That SMS code is invalid or expired.',
     'auth/captcha-check-failed':'Complete the reCAPTCHA and try again.',
     'auth/too-many-requests':'Too many attempts. Wait a little and try again.',
+    'auth/requires-recent-login':'For security, sign in again before deleting your account.',
   };
   return messages[code] || error?.message || 'Firebase could not complete that request.';
 }
@@ -272,6 +273,15 @@ function initAuthControls() {
     clearTimeout(saveTimer);
     await writeWorkspace();
     await signOut(auth);
+  });
+  $('cloudDeleteBtn').onclick = () => runAuth(async () => {
+    if (!activeUser) throw new Error('Sign in to delete your account.');
+    const confirmed = window.confirm('Delete your Classmark account and synced attendance data? This cannot be undone.');
+    if (!confirmed) return;
+    clearTimeout(saveTimer);
+    await deleteDoc(cloudRef(activeUser.uid));
+    await deleteUser(activeUser);
+    window.classmarkApp.notify('Your account and synced workspace were deleted.');
   });
 }
 

@@ -24,6 +24,7 @@ This project evolved from a local attendance prototype into a synced web and And
 - Added a visible portal-paste entry point, local Attended/Total table parsing, Gemini consent before fallback processing, and a retry/manual fallback for temporary Gemini errors.
 - Added Edit subject validation so blank names and attended counts above total are shown inline and cannot be saved.
 - Fixed the Glass mode document width so animated surfaces no longer create a visible right-side scroll gap.
+- Added the privacy-policy page and visible links in the login and Settings surfaces, plus account deletion for the Firebase Auth account and synced Firestore workspace.
 
 The earlier floating-plus removal was a temporary intermediate state; the current UI restores the persistent Add class control and documents it above.
 

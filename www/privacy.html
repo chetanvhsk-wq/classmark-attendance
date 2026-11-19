@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c0d10">
+  <title>Classmark Privacy Policy</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0c0d10;--card:#171a21;--text:#f4f6fb;--muted:#aeb6c5;--accent:#ff6e6e}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#28202a,var(--bg) 42%);color:var(--text);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    main{width:min(100% - 32px,760px);margin:0 auto;padding:48px 0 72px}article{background:rgba(23,26,33,.86);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:clamp(22px,5vw,48px);box-shadow:0 24px 70px rgba(0,0,0,.28)}
+    h1{font-size:clamp(30px,7vw,46px);line-height:1.05;letter-spacing:-.04em;margin:0 0 8px}h2{margin:32px 0 8px;font-size:20px}p,ul{margin:10px 0;color:var(--muted)}strong{color:var(--text)}a{color:#ffaaaa;text-underline-offset:3px}.updated{font-size:13px;color:var(--muted)}.back{display:inline-block;margin-bottom:28px;color:#ffaaaa}
+  </style>
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">← Back to Classmark</a>
+  <article>
+    <h1>Classmark Privacy Policy</h1>
+    <p class="updated">Last updated: November 19, 2026</p>
+    <p>Classmark is an attendance tracker maintained by Chetan Venugopala. This policy explains what information Classmark handles when you use the web app or Android app.</p>
+
+    <h2>Information we handle</h2>
+    <ul>
+      <li><strong>Account information:</strong> email address, phone number, display name, and the authentication identifiers supplied by Firebase Authentication when you sign in.</li>
+      <li><strong>Synced workspace data:</strong> subjects, attendance counts and records, targets, timetable entries, and selected preferences. This is stored in your user-scoped Firestore workspace so the same account can work across devices.</li>
+      <li><strong>Device-only data:</strong> wallpapers, timetable photos, and Gemini configuration are kept on the device and are not written to the synced Firestore workspace.</li>
+      <li><strong>Import data:</strong> standard Attended/Total tables are read locally in the app. Classmark asks for permission before sending complex text or images to the Gemini processing service.</li>
+    </ul>
+
+    <h2>How information is used</h2>
+    <p>We use this information to authenticate you, sync your attendance workspace, calculate attendance guidance, send reminders when you enable them, and provide imports and exports that you request. Classmark does not sell your personal information.</p>
+
+    <h2>Service providers</h2>
+    <p>Firebase Authentication and Cloud Firestore provide account and sync services. Vercel hosts the web app and server functions. When you explicitly approve Gemini processing for a complex import, the requested import content is sent through the server-side Gemini proxy to produce a preview. The Gemini API key is not sent to your browser.</p>
+
+    <h2>Security and retention</h2>
+    <p>Firestore access is restricted by the signed-in user ID and the app uses HTTPS in production. Synced workspace data remains while your account exists or until you delete it. Device-only data remains on your device until you remove it or clear the app/browser data.</p>
+
+    <h2>Delete your account</h2>
+    <p>In Classmark, open <strong>Settings → Account &amp; sync → Delete account and data</strong>. After confirmation, Classmark deletes your synced workspace and Firebase Authentication account, then signs you out. A recent sign-in may be required for security. You can contact the maintainer through the <a href="https://github.com/chetanvhsk-wq/classmark-attendance/issues" rel="noopener">Classmark issue tracker</a> if you cannot access the app.</p>
+
+    <h2>Children</h2>
+    <p>Classmark is intended for students and is not directed at children under 13. Do not create an account for someone who is not permitted to use the service in their region.</p>
+
+    <h2>Contact</h2>
+    <p>For privacy questions or deletion assistance, use the <a href="https://github.com/chetanvhsk-wq/classmark-attendance/issues" rel="noopener">Classmark issue tracker</a>. Do not post attendance records, passwords, phone numbers, or other private information in a public issue.</p>
+  </article>
+</main>
+</body>
+</html>

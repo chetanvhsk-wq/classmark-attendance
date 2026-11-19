@@ -48,7 +48,7 @@ You can edit mistakes, review attendance by day, and open **Stats** for trends a
 
 ### Sign in
 
-The login screen supports Google, email/password, and phone verification. Create an account or sign in before using the attendance workspace. On a local web preview, run the app through `http://localhost:8000` and add `localhost` to Firebase Authentication’s authorized domains.
+The login screen supports Google, email/password, and phone verification. Create an account or sign in before using the attendance workspace. On a local web preview, run the app through `http://localhost:8000` and add `localhost` to Firebase Authentication’s authorized domains. Read the [Classmark Privacy Policy](www/privacy.html); signed-in users can delete their account and synced workspace from Settings.
 
 ### What the labels mean
 
