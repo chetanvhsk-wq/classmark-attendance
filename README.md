@@ -34,7 +34,7 @@ It answers one question: *how many classes can I skip, or how many do I need to 
 | Understand the fixes | [Problems overcome](problems.md) |
 | Run locally | [Run Locally](#run-locally) |
 
-Classmark is local-first, so it works without an account and your data remains available on the device. Sign in only when you want your attendance to sync across devices.
+Classmark requires a signed-in account to open the workspace. Sign in with Google, email/password, or phone verification; your attendance workspace then syncs securely across your devices.
 
 > **One account, every device:** Sign up once with Google or email/password and use that same account anywhere. Google-created accounts can also be given an email/password login from Firebase, so email/password remains a backup if Google sign-in is unavailable. Attendance, timetable, preferences, and other synced changes are reflected across every device signed in to the same account.
 
@@ -44,7 +44,11 @@ Classmark is local-first, so it works without an account and your data remains a
 2. **Mark each class** — tap **Present** or **Absent** after class. You can choose another date when entering older attendance.
 3. **Follow the guidance** — each subject shows your current percentage and the practical next step: how many classes you may skip or how many you need to attend to reach your target.
 
-You can edit mistakes, review attendance by day, and open **Stats** for trends and a longer-term activity view. Use **Settings** to change the appearance, set reminders, import or export a backup, and optionally sign in for sync.
+You can edit mistakes, review attendance by day, and open **Stats** for trends and a longer-term activity view. Use **Settings** to change the appearance, set reminders, import or export a backup, and manage your signed-in account.
+
+### Sign in
+
+The login screen supports Google, email/password, and phone verification. Create an account or sign in before using the attendance workspace. On a local web preview, run the app through `http://localhost:8000` and add `localhost` to Firebase Authentication’s authorized domains.
 
 ### What the labels mean
 
@@ -57,7 +61,7 @@ You can edit mistakes, review attendance by day, and open **Stats** for trends a
 | **Need to attend** | The number of future classes to attend in a row to reach your target |
 | **Can skip** | The number of future classes you can miss while staying at or above your target |
 
-> **Privacy note:** Attendance data stays on your device unless you choose to sign in and enable sync. Timetable photos and wallpapers stay on-device even when sync is enabled.
+> **Privacy note:** Attendance records and workspace settings sync only to the signed-in account. Timetable photos and wallpapers stay on-device even when sync is enabled.
 
 ## Why it is useful
 
@@ -97,7 +101,7 @@ That said, what I built goes well beyond a surface-level fork. The original was 
 - Native Android home-screen widget showing overall % and up to 4 subjects
 - Export/import as JSON, CSV, PDF, and Excel — Android uses the system share sheet, web downloads normally
 - Light/dark themes with multiple UI styles and accent colors
-- Optional Firebase Authentication — email/password, Google, or phone sign-in
+- Required Firebase Authentication — email/password, Google, or phone sign-in
 - Owner-protected Firestore sync for attendance, course totals, timetable, and preferences
 
 ---
