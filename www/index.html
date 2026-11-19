@@ -408,7 +408,7 @@ body.ui-skeu.tone-light .card-menu button:active{ background:rgba(0,0,0,0.06); }
 .empty-state .btn{ display:inline-block; padding:10px 20px; }
 
 .fab{
-  position:fixed; bottom:96px; right:20px; width:58px; height:58px; border-radius:50%;
+  position:fixed; right:20px; bottom:calc(86px + env(safe-area-inset-bottom,0px)); width:56px; height:56px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
   color:#fff; border:none; cursor:pointer; z-index:31;
   background: rgb(var(--accent));
@@ -418,7 +418,7 @@ body.ui-skeu.tone-light .card-menu button:active{ background:rgba(0,0,0,0.06); }
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.3),
     0 4px 10px rgba(0,0,0,0.35);
-  transition:transform 180ms var(--ease-spring);
+  transition:transform 180ms var(--ease-spring), box-shadow 180ms ease;
 }
 .fab svg{ width:24px; height:24px; }
 .fab:active{ transform:scale(0.82) rotate(-6deg); box-shadow:inset 0 4px 10px rgba(0,0,0,0.4); transition:transform 60ms ease-out; }
@@ -874,7 +874,7 @@ body.ui-skeu .util-btn,body.ui-skeu.tone-light .util-btn{
 body.ui-skeu .util-btn.danger,body.ui-skeu.tone-light .util-btn.danger{background:#fff4f2;border-color:#f4d0ca;color:#c84c40;}
 body.ui-skeu .btn-secondary,body.ui-skeu.tone-light .btn-secondary{background:#eef1f5;color:#354052;}
 body.ui-skeu .fab,body.ui-skeu.tone-light .fab{
-  width:56px;height:56px;border-radius:18px;
+  width:56px;height:56px;border-radius:50%;
   background:rgb(var(--accent));
   box-shadow:0 8px 18px rgba(var(--accent),.28);
 }
@@ -1072,7 +1072,7 @@ body.ui-glass .toast{backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-f
   .app{max-width:1120px;padding:104px 36px 56px;margin:0 auto;}
   .navbar{top:18px;bottom:auto;left:50%;right:auto;width:min(380px,calc(100% - 32px));padding:0;transform:translateX(-50%);background:transparent!important;}
   .navbar-inner{width:100%;max-width:none;}
-  .fab{right:max(36px,calc((100vw - 1120px)/2 + 36px));bottom:32px;}
+  .fab{right:max(28px,calc((100vw - 1120px)/2 + 28px));bottom:28px;}
   .toast{bottom:28px;}
   .topbar{margin-bottom:32px;}
   .stats-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
