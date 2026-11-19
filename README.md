@@ -81,7 +81,7 @@ That said, what I built goes well beyond a surface-level fork. The original was 
 | **Authentication** | None | Firebase Auth — email/password, Google, and phone sign-in |
 | **Performance** | Third-party widgets loaded at runtime, noticeable lag | Stripped CDN bloat; all libs (jsPDF, SheetJS, Firebase SDK) vendored locally at install time |
 | **Hosting** | Static file server | Vercel with server-side Node functions — Gemini API key never touches the browser |
-| **AI features** | — | Optional Gemini integration for timetable parsing |
+| **AI features** | — | Built-in Gemini integration for timetable photos, screenshots, and complex attendance parsing; local table parsing remains available |
 | **Security** | No rules; all data public | Per-user Firestore security rules |
 
 ---
