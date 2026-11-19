@@ -87,6 +87,9 @@ That said, what I built goes well beyond a surface-level fork. The original was 
 - Per-subject attendance with a configurable target percentage
 - **Skip/attend math shown front and center** — always know exactly where you stand
 - Swipe a subject card left to mark present, right to mark absent (buttons work too)
+- Persistent **Add class** button available throughout the app, plus an inline Add subject row below Home subjects
+- Four editable Home cards: rename or hide Overall, Subjects, Safe subjects, and the animated Glyph card
+- Toggle the animated Home Glyph card on or off from Settings; tap it to customize its label and visibility
 - Backfill past dates and edit or remove individual marks
 - Stats: trend graph, 84-day heatmap, weekly recap with a shareable image, day log, subject reordering
 - Reminders via Android Local Notifications or Web Notifications in the browser

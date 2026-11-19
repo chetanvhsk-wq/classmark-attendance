@@ -1,6 +1,6 @@
 # Classmark Updates
 
-**Last updated: November 15, 2026**
+**Last updated: November 19, 2026**
 
 This file tracks the major features and improvements added to Classmark.
 
@@ -50,9 +50,17 @@ These smaller foundation commits are part of the project history even when they 
 - Added an Excel Insights sheet with key metrics, subject bar visuals, present/absent pie-chart data, filters, frozen headers, and improved column sizing.
 - Added JSON and CSV export, plus data-file import.
 
+## November 19, 2026 — Home customization and class entry
+
+- Restored the animated Home Glyph card from the reference deployment.
+- Added an explicit On/Off control for the Glyph card in Settings; the card can also be renamed or hidden from its editor.
+- Made all four Home cards editable: Overall, Subjects, Safe subjects, and Glyph.
+- Restored the persistent floating **Add class** button across the app, while retaining the inline Add subject control below the Home list.
+- Updated the README and changelog to document the restored controls.
+
 ## Interface and visual design
 
-- Removed the persistent floating plus button from the bottom-right on web and Android; subject creation remains available from the Home controls.
+- The persistent floating Add class button is available across the web UI; subject creation also remains available from Home controls.
 - Added Skeuomorphic, Glass, Matte, and Normal interface styles, with light and dark appearance options.
 - Updated theme styling so the chosen interface style applies across cards, settings, inputs, dialogs, and other surfaces.
 - Refined Glass mode with translucent blurred surfaces and a transparent page/navigation background.
@@ -64,7 +72,7 @@ These smaller foundation commits are part of the project history even when they 
 - Reinstated distinct Skeuomorphic, Glass, Matte, and Normal surface treatments so selecting an interface style visibly changes the full application.
 - Simplified the sign-in page with readable dark-glass styling and reduced field/button glow.
 - Added the supplied Classmark app icon to the sign-in brand and signed-in Home header.
-- Removed the Giphy section and decorative glyph treatment.
+- Restored the editable animated Glyph card from the supplied reference deployment, with an explicit Settings toggle.
 
 ## Web and Android app
 

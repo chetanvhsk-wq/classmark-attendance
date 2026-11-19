@@ -791,6 +791,12 @@ button{ touch-action:manipulation; }
   .fab:hover{ transform:translateY(-2px); }
 }
 .action-btn:focus-visible, .today-pill:focus-visible, .nav-item:focus-visible, .fab:focus-visible{ outline-offset:3px; }
+.home-editable{cursor:pointer;}
+.home-editable:active{transform:scale(.98);}
+.home-glyph-tile{display:flex;align-items:center;justify-content:center;min-height:92px;overflow:hidden;}
+.home-glyph-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;width:78%;max-width:180px;}
+.home-glyph-dot{aspect-ratio:1;border-radius:50%;background:rgba(var(--accent),.14);transition:transform .18s ease,background .18s ease,box-shadow .18s ease;}
+.home-glyph-dot.on{background:rgb(var(--accent));box-shadow:0 0 8px rgba(var(--accent),.65);transform:scale(1.12);}
 @media (max-width:360px){
   .app{padding-left:12px;padding-right:12px;}
   .subject-card{padding-left:14px;padding-right:14px;}
@@ -1667,17 +1673,21 @@ body.ui-matte .card::before,body.ui-normal .card::before,body.ui-matte .card::af
     </div>
 
     <div class="stats-grid">
-      <div class="card stat-card">
+      <div class="card stat-card home-editable" id="homeCardOverall" role="button" tabindex="0" aria-label="Edit Overall card">
         <div class="stat-num" id="overallPct">—</div>
-        <div class="stat-label">Overall</div>
+        <div class="stat-label" id="overallLabel">Overall</div>
       </div>
-      <div class="card stat-card">
+      <div class="card stat-card home-editable" id="homeCardSubjects" role="button" tabindex="0" aria-label="Edit Subjects card">
         <div class="stat-num" id="subjectCount">0</div>
-        <div class="stat-label">Subjects</div>
+        <div class="stat-label" id="subjectsLabel">Subjects</div>
       </div>
-      <div class="card stat-card" id="safeSubjectsCard" style="grid-column:1 / -1;">
+      <div class="card stat-card home-editable" id="safeSubjectsCard" style="grid-column:1 / -1;" role="button" tabindex="0" aria-label="Edit Safe subjects card">
         <div class="stat-num" id="safeSubjectCount">0</div>
-        <div class="stat-label">Safe subjects</div>
+        <div class="stat-label" id="safeLabel">Safe subjects</div>
+      </div>
+      <div class="card stat-card home-glyph-tile home-editable" id="homeGlyphCard" role="button" tabindex="0" aria-label="Edit Home glyph card">
+        <div class="home-glyph-grid" id="homeGlyphGrid" aria-hidden="true"></div>
+        <div class="stat-label" id="glyphLabel" style="display:none;">Glyph</div>
       </div>
     </div>
     <div class="section-title">Subjects</div>
@@ -1838,6 +1848,24 @@ body.ui-matte .card::before,body.ui-normal .card::before,body.ui-matte .card::af
     </div>
 
     <div class="settings-group">
+      <div class="settings-group-title">Home screen</div>
+      <div class="card settings-block">
+        <h3>Home glyph<span class="current-val" id="homeGlyphState">On</span></h3>
+        <p class="h3-sub">Show or hide the editable animated glyph card on Home. The other four Home cards can be renamed or disabled by tapping them.</p>
+        <div class="color-mode-row">
+          <div class="mode-chip" id="homeGlyphOnChip" tabindex="0">On</div>
+          <div class="mode-chip" id="homeGlyphOffChip" tabindex="0">Off</div>
+        </div>
+        <div class="ai-row" style="margin-top:12px;">
+          <button class="util-btn" id="editHomeOverallBtn" type="button">Edit Overall</button>
+          <button class="util-btn" id="editHomeSubjectsBtn" type="button">Edit Subjects</button>
+          <button class="util-btn" id="editHomeSafeBtn" type="button">Edit Safe subjects</button>
+          <button class="util-btn" id="editHomeGlyphBtn" type="button">Edit Glyph</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group">
       <div class="settings-group-title">Wallpaper</div>
 
       <div class="card settings-block" id="wallpaperBlock">
@@ -1983,6 +2011,26 @@ body.ui-matte .card::before,body.ui-normal .card::before,body.ui-matte .card::af
   </div>
 
 </div>
+
+<div class="overlay" id="homeCardEditorOverlay">
+  <div class="sheet card">
+    <h3>Edit Home card</h3>
+    <p class="h3-sub">Customize the label or hide this card from Home.</p>
+    <input type="text" id="homeCardLabelInput" maxlength="24" placeholder="Card label">
+    <div class="color-mode-row">
+      <div class="mode-chip" id="homeCardEnabledChip" tabindex="0">Enabled</div>
+      <div class="mode-chip" id="homeCardDisabledChip" tabindex="0">Disabled</div>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn btn-secondary" id="cancelHomeCardEdit">Cancel</button>
+      <button class="btn btn-primary" id="saveHomeCardEdit">Save</button>
+    </div>
+  </div>
+</div>
+
+<button class="fab" id="addFab" aria-label="Add class">
+  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+</button>
 
 <div class="navbar">
   <div class="navbar-inner" id="navInner">
@@ -2225,10 +2273,16 @@ let state = normalizeState(load(STORE_KEY, { subjects: [] }));
 let settings = load(SETTINGS_KEY, {
   ui:'skeu', skeuTone:'light', glass:55, colorMode:'preset', accent:'red', customColor:'#ff6e6e',
   wallpaper:null, wallpaperOpacity:100, fontStyle:'default', reminderEnabled:false, reminderTime:'19:00', lastReminderFired:null, weeklyTimetable:[], timetablePhoto:null,
+  homeCards:{overall:{label:'Overall',enabled:true},subjects:{label:'Subjects',enabled:true},safe:{label:'Safe subjects',enabled:true},glyph:{label:'Glyph',enabled:true}}, glyphEnabled:true,
 });
 if(!settings.reminderDefaultsV2){ if(!settings.reminderTime || settings.reminderTime==='18:00') settings.reminderTime='19:00'; settings.reminderDefaultsV2=true; }
-if(settings.glyph) delete settings.glyph;
-if(settings.giphy) delete settings.giphy;
+if(!settings.homeCards || typeof settings.homeCards!=='object') settings.homeCards={};
+[['overall','Overall'],['subjects','Subjects'],['safe','Safe subjects'],['glyph','Glyph']].forEach(([key,label])=>{
+  if(!settings.homeCards[key]) settings.homeCards[key]={label,enabled:true};
+  if(typeof settings.homeCards[key].label!=='string') settings.homeCards[key].label=label;
+  if(typeof settings.homeCards[key].enabled!=='boolean') settings.homeCards[key].enabled=true;
+});
+if(typeof settings.glyphEnabled!=='boolean') settings.glyphEnabled=true;
 if(settings.ui === 'soft'){ settings.ui = 'skeu'; settings.skeuTone = 'light'; }
 if(!settings.skeuTone) settings.skeuTone = 'dark';
 
@@ -3170,6 +3224,60 @@ function renderSubjects(){
   bindSpecularToAllCards();
 }
 
+let editingHomeCard = null;
+function renderHomeCards(){
+  const cards = settings.homeCards;
+  [['overall','homeCardOverall','overallLabel'],['subjects','homeCardSubjects','subjectsLabel'],['safe','safeSubjectsCard','safeLabel'],['glyph','homeGlyphCard','glyphLabel']].forEach(([key,cardId,labelId])=>{
+    const card=document.getElementById(cardId), label=document.getElementById(labelId);
+    if(!card) return;
+    card.style.display=cards[key].enabled?'':'none';
+    if(label) label.textContent=cards[key].label;
+  });
+  const grid=document.getElementById('homeGlyphGrid');
+  if(grid && settings.glyphEnabled){
+    grid.innerHTML=Array.from({length:36},(_,i)=>`<span class="home-glyph-dot${(i%12===Math.floor(i/12)||i%12===11-Math.floor(i/12))?' on':''}"></span>`).join('');
+  }
+  const state=document.getElementById('homeGlyphState'); if(state) state.textContent=settings.glyphEnabled?'On':'Off';
+  document.getElementById('homeGlyphOnChip')?.classList.toggle('active',settings.glyphEnabled);
+  document.getElementById('homeGlyphOffChip')?.classList.toggle('active',!settings.glyphEnabled);
+}
+function openHomeCardEditor(key){
+  editingHomeCard=key;
+  const cfg=settings.homeCards[key];
+  document.getElementById('homeCardLabelInput').value=cfg.label;
+  document.getElementById('homeCardEnabledChip').classList.toggle('active',cfg.enabled);
+  document.getElementById('homeCardDisabledChip').classList.toggle('active',!cfg.enabled);
+  document.getElementById('homeCardEditorOverlay').classList.add('open');
+  stackPush('homeCardEditorOverlay',()=>document.getElementById('homeCardEditorOverlay').classList.remove('open'));
+}
+function bindHomeCardEditor(){
+  [['homeCardOverall','overall'],['homeCardSubjects','subjects'],['safeSubjectsCard','safe'],['homeGlyphCard','glyph']].forEach(([id,key])=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.onclick=()=>openHomeCardEditor(key);
+    el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openHomeCardEditor(key);}};
+  });
+  document.getElementById('homeCardEnabledChip').onclick=()=>{document.getElementById('homeCardEnabledChip').classList.add('active');document.getElementById('homeCardDisabledChip').classList.remove('active');};
+  document.getElementById('homeCardDisabledChip').onclick=()=>{document.getElementById('homeCardDisabledChip').classList.add('active');document.getElementById('homeCardEnabledChip').classList.remove('active');};
+  document.getElementById('cancelHomeCardEdit').onclick=()=>{document.getElementById('homeCardEditorOverlay').classList.remove('open');stackRemove('homeCardEditorOverlay');};
+  document.getElementById('saveHomeCardEdit').onclick=()=>{
+    if(!editingHomeCard) return;
+    const label=document.getElementById('homeCardLabelInput').value.trim();
+    if(!label){showToast('Enter a card label');return;}
+    settings.homeCards[editingHomeCard].label=label;
+    settings.homeCards[editingHomeCard].enabled=document.getElementById('homeCardEnabledChip').classList.contains('active');
+    if(editingHomeCard==='glyph') settings.glyphEnabled=settings.homeCards.glyph.enabled;
+    save(); renderHomeCards();
+    document.getElementById('homeCardEditorOverlay').classList.remove('open');stackRemove('homeCardEditorOverlay');showToast('Home card updated');
+  };
+  document.getElementById('homeGlyphOnChip').onclick=()=>{settings.glyphEnabled=true;settings.homeCards.glyph.enabled=true;save();renderHomeCards();};
+  document.getElementById('homeGlyphOffChip').onclick=()=>{settings.glyphEnabled=false;settings.homeCards.glyph.enabled=false;save();renderHomeCards();};
+  document.getElementById('editHomeOverallBtn').onclick=()=>openHomeCardEditor('overall');
+  document.getElementById('editHomeSubjectsBtn').onclick=()=>openHomeCardEditor('subjects');
+  document.getElementById('editHomeSafeBtn').onclick=()=>openHomeCardEditor('safe');
+  document.getElementById('editHomeGlyphBtn').onclick=()=>openHomeCardEditor('glyph');
+}
+bindHomeCardEditor();
+
 function addMark(id, status){
   const s = state.subjects.find(x=>x.id===id); if(!s) return;
   const key = activeDateStr();
@@ -3345,7 +3453,7 @@ function openAddOverlay(){
   stackPush('addOverlay', ()=> document.getElementById('addOverlay').classList.remove('open'));
   haptic(H.open);
 }
-// Floating plus action removed; add subjects from the Home controls.
+document.getElementById('addFab').onclick = openAddOverlay;
 document.getElementById('cancelAdd').onclick = ()=>{ document.getElementById('addOverlay').classList.remove('open'); stackRemove('addOverlay'); haptic(H.close); };
 document.getElementById('confirmAdd').onclick = ()=>{
   const name = document.getElementById('newSubjectName').value.trim();
@@ -4049,7 +4157,7 @@ document.getElementById('confirmOkBtn').onclick = ()=>{
 
 /* ---------- Render all ---------- */
 function renderAll(){
-  renderStats(); renderHero(); renderSubjects(); renderGraphSelect(); renderGraph();
+  renderStats(); renderHero(); renderSubjects(); renderHomeCards(); renderGraphSelect(); renderGraph();
   renderHeatSelect(); renderHeatmap(); syncAccentDots(); updateSettingsSummaries();
   renderWeekRecap(); renderDayLog(); renderReorderList();
 }
