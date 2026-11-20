@@ -22,21 +22,51 @@ gradle, code_count = re.subn(r"(?m)^(\s*versionCode\s+)\d+\s*$", rf"\g<1>{versio
 gradle, name_count = re.subn(r'(?m)^(\s*versionName\s+")[^"]*("\s*)$', rf"\g<1>{version}\2", gradle, count=1)
 if code_count != 1 or name_count != 1:
     sys.exit("could not set Android versionCode and versionName in android/app/build.gradle")
+
+# 2) Use the same Android certificate that Firebase OAuth is configured for.
+if "storeFile file('../../keystore/debug.keystore')" not in gradle:
+    signing_config = """
+    signingConfigs {
+        debug {
+            storeFile file('../../keystore/debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+"""
+    gradle, signing_count = re.subn(
+        r"(?m)^android[ \t]*\{[ \t]*$",
+        lambda match: match.group(0) + signing_config,
+        gradle,
+        count=1,
+    )
+    if signing_count != 1:
+        sys.exit("could not set the stable Android debug signing key")
+if "signingConfig signingConfigs.debug" not in gradle:
+    gradle, build_types_count = re.subn(
+        r"(?m)^([ \t]*buildTypes[ \t]*\{)[ \t]*$",
+        r"\1\n        debug {\n            signingConfig signingConfigs.debug\n        }",
+        gradle,
+        count=1,
+    )
+    if build_types_count != 1:
+        sys.exit("could not apply the stable signing key to Android debug builds")
 with open(gradle_path, "w", encoding="utf8") as f:
     f.write(gradle)
 
-# 2) Java sources (MainActivity is replaced so it registers the widget plugin)
+# 3) Java sources (MainActivity is replaced so it registers the widget plugin)
 for f in os.listdir(os.path.join(ROOT, "overlay", "java")):
     shutil.copy(os.path.join(ROOT, "overlay", "java", f), os.path.join(PKG_DIR, f))
 
-# 3) Widget resources
+# 4) Widget resources
 for sub in ("layout", "drawable", "xml"):
     dst = os.path.join(MAIN, "res", sub)
     os.makedirs(dst, exist_ok=True)
     for f in os.listdir(os.path.join(ROOT, "overlay", "res", sub)):
         shutil.copy(os.path.join(ROOT, "overlay", "res", sub, f), os.path.join(dst, f))
 
-# 4) Manifest: widget receiver + notification permission
+# 5) Manifest: widget receiver + notification permission
 mpath = os.path.join(MAIN, "AndroidManifest.xml")
 m = open(mpath, encoding="utf8").read()
 if "AttendanceWidgetProvider" not in m:
@@ -57,7 +87,7 @@ for permission in (
         m = m.replace("</manifest>", f'    <uses-permission android:name="{permission}" />\n</manifest>')
 open(mpath, "w", encoding="utf8").write(m)
 
-# 5) Launcher icon from icon.png (replaces the default Capacitor icon)
+# 6) Launcher icon from icon.png (replaces the default Capacitor icon)
 try:
     from PIL import Image
     src = Image.open(os.path.join(ROOT, "icon.png")).convert("RGBA")
