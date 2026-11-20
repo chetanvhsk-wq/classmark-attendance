@@ -1,6 +1,6 @@
 {
   "name": "@chetanvhsk-wq/classmark-attendance",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Classmark attendance web app package",
   "private": false,
   "files": ["www", "README.md"],

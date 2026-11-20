@@ -1,4 +1,18 @@
-# Problems overcome
+# Problems overcome and stability record
+
+**Release candidate:** Classmark v1.0.7
+**Repository status:** Private; prepared as the most stable candidate to date, pending CI and release approval.
+
+This log consolidates the problems documented in tracked commits and the previous project notes. It records confirmed fixes, not every unrecorded local incident. The release candidate adds notification error reporting, serialized rescheduling, reminder-owned cancellation, and tap-to-Home routing.
+
+## v1.0.7 stability-candidate fixes
+
+- Fixed browser notification permission requests and delivery failures being silently ignored; failures are now reported and the in-app reminder remains available as a fallback.
+- Fixed Android local-notification reschedules running concurrently, which could cancel or replace a newer schedule; scheduling now runs serially.
+- Limited reminder cancellation to Classmark reminder IDs instead of cancelling every pending local notification.
+- Added a validated reminder payload and action handler so tapping a Classmark reminder opens the Home attendance view.
+- Added visible handling for missing Android notification support, denied permission, schedule errors, and tap-handler registration errors.
+- Confirmed the source logo and web icon assets have been tracked unchanged since the initial app import; the existing Class Mark artwork remains the source for Android, PWA, favicon, and in-app use.
 
 This project evolved from a local attendance prototype into a synced web and Android app. The main problems solved were:
 
@@ -38,14 +52,14 @@ The earlier floating-plus removal was a temporary intermediate state; the curren
 - Updated the root package version and corrected the published package version used by GitHub Packages.
 - Removed the incorrect `v1.0.5` release and rebuilt the single `v1.0.4` release from the corrected commit.
 - Confirmed the GitHub Packages workflow completed successfully.
-- Built the Android APK successfully through GitHub Actions and attached `app-debug.apk` to the `v1.0.4` GitHub release.
+- Built the Android APK successfully through GitHub Actions and attached `app-debug.apk` to the `v1.0.4` GitHub release at that time; GitHub no longer lists v1.0.4 as a published release.
 - Documented the release fixes, including reminders, theme fixes, package publishing, and APK delivery.
 
 ## Release verification
 
-- Release: [Classmark v1.0.4](https://github.com/chetanvhsk-wq/classmark-attendance/releases/tag/v1.0.4)
-- APK: [app-debug.apk](https://github.com/chetanvhsk-wq/classmark-attendance/releases/download/v1.0.4/app-debug.apk)
-- Corrected release commit: `c49876a`
+- The latest published GitHub Release is [Classmark v1.0.3](https://github.com/chetanvhsk-wq/classmark-attendance/releases/tag/v1.0.3).
+- The repository also contains a v1.0.6 tag, but GitHub does not list a published release for that tag. v1.0.7 is the next unique candidate tag; it remains unpublished pending explicit approval.
+- Release assets and workflow runs must be rechecked at publication time; historical links in older notes are not evidence of current availability.
 
 ## Current known limitation
 
