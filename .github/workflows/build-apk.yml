@@ -63,6 +63,15 @@ jobs:
       - name: Build debug APK
         run: chmod +x android/gradlew && cd android && ./gradlew assembleDebug --no-daemon
 
+      - name: Verify APK signing certificate
+        run: |
+          mkdir -p "$RUNNER_TEMP/apk-certificate"
+          unzip -p android/app/build/outputs/apk/debug/app-debug.apk META-INF/CERT.RSA > "$RUNNER_TEMP/apk-certificate/CERT.RSA"
+          openssl pkcs7 -inform DER -in "$RUNNER_TEMP/apk-certificate/CERT.RSA" -print_certs -out "$RUNNER_TEMP/apk-certificate/certificate.pem"
+          expected="$(keytool -list -v -keystore keystore/debug.keystore -storepass android -alias androiddebugkey | awk '/SHA256:/{gsub(/:/, "", $2); print toupper($2); exit}')"
+          actual="$(openssl x509 -in "$RUNNER_TEMP/apk-certificate/certificate.pem" -noout -fingerprint -sha256 | cut -d= -f2 | tr -d ':' | tr '[:lower:]' '[:upper:]')"
+          test -n "$expected" && test "$expected" = "$actual" || { echo "APK signing certificate does not match keystore/debug.keystore"; exit 1; }
+
       - name: Name APK classmark.apk
         run: cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/classmark.apk
 
