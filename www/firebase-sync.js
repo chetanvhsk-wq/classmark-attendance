@@ -1,4 +1,5 @@
 import { initializeApp, getApps } from 'firebase/app';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import {
   getAuth, onAuthStateChanged, createUserWithEmailAndPassword,
   signInWithEmailAndPassword, signInWithPopup, signInWithCredential, GoogleAuthProvider,
@@ -227,29 +228,23 @@ function runAuth(task) {
 }
 
 function initAuthControls() {
-  const isNative = Boolean(window.Capacitor?.isNativePlatform?.() || window.Capacitor?.getPlatform?.() === 'android' || window.Capacitor?.getPlatform?.() === 'ios');
-  // Native Google OAuth is intentionally hidden until a production signing
-  // certificate is configured. Email/password and phone auth remain available
-  // in the APK; the full provider set remains available on the web app.
-  if (isNative && $('cloudGoogleBtn')) $('cloudGoogleBtn').style.display = 'none';
+  const platform = window.Capacitor?.getPlatform?.();
+  const isNative = Boolean(window.Capacitor?.isNativePlatform?.() || platform === 'android' || platform === 'ios');
+  const isAndroid = platform === 'android';
+  if (isNative && !isAndroid && $('cloudGoogleBtn')) $('cloudGoogleBtn').style.display = 'none';
   $('cloudSignInBtn').onclick = () => runAuth(() => signInWithEmailAndPassword(auth, $('cloudEmail').value.trim(), $('cloudPassword').value));
   $('cloudCreateBtn').onclick = () => runAuth(() => createUserWithEmailAndPassword(auth, $('cloudEmail').value.trim(), $('cloudPassword').value));
-  $('cloudGoogleBtn').onclick = () => runAuth(() => {
-    const isNative = Boolean(window.Capacitor?.isNativePlatform?.() || window.Capacitor?.getPlatform?.() === 'android' || window.Capacitor?.getPlatform?.() === 'ios');
-    if (isNative) {
-      const googleAuth = window.Capacitor?.Plugins?.GoogleAuth;
-      if (!googleAuth) throw new Error('Native Google sign-in is unavailable in this APK build. Reinstall the latest APK.');
-      return googleAuth.initialize({
+  $('cloudGoogleBtn').onclick = () => runAuth(async () => {
+    if (isAndroid) {
+      await GoogleAuth.initialize({
         clientId: '10955156934-1grht2e5b18us57d0gquj9titnfbcgu7.apps.googleusercontent.com',
         scopes: ['profile', 'email'],
         grantOfflineAccess: true,
-      })
-        .then(() => googleAuth.signIn())
-        .then(result => {
-          const idToken = result?.authentication?.idToken || result?.idToken;
-          if (!idToken) throw new Error('Google did not return an ID token.');
-          return signInWithCredential(auth, GoogleAuthProvider.credential(idToken));
-        });
+      });
+      const result = await GoogleAuth.signIn();
+      const idToken = result?.authentication?.idToken || result?.idToken;
+      if (!idToken) throw new Error('Google did not return an ID token.');
+      return signInWithCredential(auth, GoogleAuthProvider.credential(idToken));
     }
     return signInWithPopup(auth, new GoogleAuthProvider());
   });
