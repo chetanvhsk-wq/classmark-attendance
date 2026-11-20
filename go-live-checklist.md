@@ -30,7 +30,7 @@
 **Reference:** https://support.google.com/googleplay/android-developer/answer/11926878
 
 ### [PENDING] C2. Configure Play App Signing and a release upload key
-**What:** CI copies `keystore/debug.keystore` and publishes `app-debug.apk` at `.github/workflows/build-apk.yml:56-64`.
+**What:** CI copies `keystore/debug.keystore` and publishes `classmark.apk` at `.github/workflows/build-apk.yml`.
 **Why critical:** A debug APK is not a production release artifact, and future updates require a stable protected signing path.
 **Where:** `.github/workflows/build-apk.yml:56-64`, `keystore/debug.keystore`
 **How:** Create a separate upload keystore outside Git, store its values in GitHub Actions secrets, configure a release signing task, enroll the package `com.attendance.app` in Play App Signing, and upload an AAB rather than the debug APK.
@@ -101,11 +101,11 @@
 **How:** Test the release AAB/APK on Android 12, 13, 14, 15, and 16 or representative devices: sign-in and sign-out, account sync, account deletion, reminders, widget refresh, import/export, offline behavior, deep links, and upgrade from the previous version.
 **Reference:** https://developer.android.com/studio/publish/preparing
 
-### [PENDING] H6. Align release version metadata
-**What:** `package.json:3` reports version `1.0.5`, while README and release notes reference older release versions; Android `versionCode` and `versionName` are generated and not reviewable in this checkout.
-**Why:** Inconsistent release metadata causes confusing Play uploads and makes rollback and support harder.
-**Where:** `package.json:1-4`, `README.md:32`, `updates.md`
-**How:** Choose one release version, set Android `versionCode` and `versionName` explicitly in the generated release configuration, update README/release links, and record the exact Git commit and AAB checksum for each upload.
+### [DONE FOR v1.0.7 CANDIDATE] H6. Align release version metadata
+**What:** The root app package, lockfile, and publishable package now use version `1.0.7`; `scripts/patch_android.py` applies that version as Android `versionName` and derives an increasing numeric `versionCode`.
+**Why:** Consistent release metadata prevents confusing Android upgrades and support reports.
+**Where:** `package.json`, `package-lock.json`, `package/package.json`, `scripts/patch_android.py`, `README.md`, `problems and updates/updates.md`
+**Remaining:** Record the exact commit and APK checksum after the approved build; this candidate is still a debug-signed APK and is not Play Store-ready.
 **Reference:** https://developer.android.com/studio/publish/versioning
 
 ### [PENDING] H7. Configure and smoke-test the Vercel Gemini proxy

@@ -12,6 +12,7 @@ It answers one question: *how many classes can I skip, or how many do I need to 
 
 <br/>
 
+[![Stable Release](https://img.shields.io/badge/Stable%20Release-latest%20GitHub%20release-2ea44f?style=for-the-badge)](https://github.com/chetanvhsk-wq/classmark-attendance/releases/latest)
 [![Build Android APK](https://github.com/chetanvhsk-wq/classmark-attendance/actions/workflows/build-apk.yml/badge.svg)](https://github.com/chetanvhsk-wq/classmark-attendance/actions)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Live demo](https://img.shields.io/badge/Live%20demo-Classmark-ff6b6b?logo=vercel&logoColor=white)](https://classmark-attendance-nexus-9af5.vercel.app/)
@@ -19,8 +20,8 @@ It answers one question: *how many classes can I skip, or how many do I need to 
 [![Firebase](https://img.shields.io/badge/backend-Firebase-orange?logo=firebase&logoColor=white)](https://classmark-attendance-nexus-9af5.vercel.app/)
 [![Vercel](https://img.shields.io/badge/hosted%20on-Vercel-black?logo=vercel&logoColor=white)](https://classmark-attendance-nexus-9af5.vercel.app/)
 
-[![See all updates](https://img.shields.io/badge/See%20all%20updates-changelog-6c63ff?style=for-the-badge)](updates.md)
-[![Problems overcome](https://img.shields.io/badge/Problems%20overcome-read%20the%20log-8b5cf6?style=for-the-badge)](problems.md)
+[![See all updates](https://img.shields.io/badge/See%20all%20updates-changelog-6c63ff?style=for-the-badge)](problems%20and%20updates/updates.md)
+[![Problems overcome](https://img.shields.io/badge/Problems%20overcome-read%20the%20log-8b5cf6?style=for-the-badge)](problems%20and%20updates/problems.md)
 
 </div>
 
@@ -29,10 +30,12 @@ It answers one question: *how many classes can I skip, or how many do I need to 
 | Need | Go to |
 |---|---|
 | Try the app | [Live web app](https://classmark-attendance-nexus-9af5.vercel.app/) |
-| Install Android | [Latest release](https://github.com/chetanvhsk-wq/classmark-attendance/releases/tag/v1.0.6) |
-| See what changed | [Updates](updates.md) |
-| Understand the fixes | [Problems overcome](problems.md) |
+| Install Android | [Latest Stable Release](https://github.com/chetanvhsk-wq/classmark-attendance/releases/latest) |
+| See what changed | [Updates](problems%20and%20updates/updates.md) |
+| Understand the fixes | [Problems overcome](problems%20and%20updates/problems.md) |
 | Run locally | [Run Locally](#run-locally) |
+
+> **Private release candidate:** v1.0.3 is the latest published GitHub Release. The v1.0.7 candidate build passed on its review branch; main merge and release publication remain pending the required owner review and explicit release approval.
 
 Classmark requires a signed-in account to open the workspace. Sign in with Google, email/password, or phone verification; your attendance workspace then syncs securely across your devices.
 
@@ -110,7 +113,7 @@ That said, what I built goes well beyond a surface-level fork. The original was 
 
 1. Go to the **Actions** tab → open the latest green **Build Android APK** run
 2. Download the **attendance-apk** artifact and unzip it
-3. Copy `app-debug.apk` to your phone and install it (allow "Install from unknown sources" when prompted)
+3. Copy `classmark.apk` to your phone and install it (allow "Install from unknown sources" when prompted)
 
 The workflow runs on every push. You can also trigger it manually via **Run workflow**.
 
@@ -149,9 +152,10 @@ npx cap add android
 python3 scripts/patch_android.py
 npx cap sync android
 cd android && ./gradlew assembleDebug
+cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/classmark.apk
 ```
 
-Output: `android/app/build/outputs/apk/debug/app-debug.apk`
+Output: `android/app/build/outputs/apk/debug/classmark.apk`
 
 The Android Firebase config is intentionally not committed. For local Android builds, download `google-services.json` from Firebase and place it at the repository root. For GitHub Actions, add the complete file contents as a repository secret named `GOOGLE_SERVICES_JSON`; the workflow writes it only during the build.
 
@@ -227,7 +231,7 @@ MIT — see [LICENSE](LICENSE).
 
 ### Project history
 
-[Read the complete problems overcome log →](problems.md) · [View all updates →](updates.md)
+[Read the problems and stability log →](problems%20and%20updates/problems.md) · [View all updates →](problems%20and%20updates/updates.md)
 
 </div>
 

@@ -2916,9 +2916,20 @@ document.getElementById('reminderOnChip').onclick = ()=>{
   if(!(settings.weeklyTimetable||[]).length){ showToast('Add your weekly timetable first'); document.getElementById('timetableGroup').scrollIntoView({behavior:'smooth',block:'center'}); return; }
   settings.reminderEnabled = true; settings.reminderUserDisabled=false; settings.lastReminderFired=null; save(); applySettings(); refreshReminderSchedule(); haptic(H.toggle);
   if(!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) && 'Notification' in window && Notification.permission === 'default'){
-    Notification.requestPermission().then(()=>checkReminder()).catch(()=>{});
+    requestWebNotificationPermission();
   }
 };
+async function requestWebNotificationPermission(){
+  if(!('Notification' in window)){ showToast('Browser notifications are unavailable; keep Classmark open for reminders'); return; }
+  try{
+    const permission=await Notification.requestPermission();
+    if(permission==='granted') checkReminder();
+    else showToast(permission==='denied'?'Notifications are blocked in browser settings':'Allow notifications to receive class reminders');
+  }catch(error){
+    console.error('Unable to request browser notification permission',error);
+    showToast('Unable to request notification permission');
+  }
+}
 (function(){
   const btn=document.getElementById('reminderTimeBtn'), ov=document.getElementById('timePickerOverlay');
   const hc=document.getElementById('tpHours'), mc=document.getElementById('tpMinutes');
@@ -2968,7 +2979,8 @@ function checkReminder(){
   if(progress.complete){ settings.lastReminderFired = todayStr(); save(); return; }
   const missing=progress.missing.map(x=>x.count>1?`${x.name} (${x.count})`:x.name).join(', ');
   if('Notification' in window && Notification.permission === 'granted'){
-    try{ new Notification('Classmark', { body: `Remember to mark today’s classes: ${missing}`, icon:'icon-192.png' }); settings.lastReminderFired = todayStr(); save(); }catch(e){}
+    try{ new Notification('Classmark', { body: `Remember to mark today’s classes: ${missing}`, icon:'icon-192.png' }); settings.lastReminderFired = todayStr(); save(); }
+    catch(error){ console.error('Unable to show browser class reminder',error); settings.lastReminderFired = todayStr(); save(); showToast(`Remember to mark: ${missing}`); }
   } else {
     settings.lastReminderFired = todayStr(); save();
     showToast(`Remember to mark: ${missing}`);
@@ -4552,7 +4564,7 @@ ${sourceText}`;
     if(settings.reminderUserDisabled) return;
     settings.reminderEnabled=true; settings.lastReminderFired=null;
     refreshReminderSchedule();
-    if(!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())&&'Notification' in window&&Notification.permission==='default') Notification.requestPermission().catch(()=>{});
+    if(!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())&&'Notification' in window&&Notification.permission==='default') requestWebNotificationPermission();
   }
   $('timetableAddBtn').onclick=()=>{
     const subject=$('timetableSubject').value.trim(), day=Number($('timetableDay').value);
@@ -4652,14 +4664,30 @@ ${sourceText}`;
     try{ await WB.update({ json: JSON.stringify(widgetPayload()) }); }catch(e){}
   }
 
-  async function scheduleReminders(){
-    if(!LN) return;
-    try{
+  function isReminderNotificationId(id){
+    const dateCode=Number(id)-200000;
+    if(!Number.isInteger(dateCode)||dateCode<0||dateCode>991231) return false;
+    const month=Math.floor(dateCode/100)%100, day=dateCode%100;
+    return month>=1&&month<=12&&day>=1&&day<=31;
+  }
+
+  let scheduleQueue=Promise.resolve();
+  function scheduleReminders(){
+    if(!LN){
+      if(settings.reminderEnabled){ console.error('Capacitor Local Notifications plugin is unavailable'); showToast('Class reminders are unavailable in this app build'); }
+      return Promise.resolve();
+    }
+    const run=async()=>{
       const pending = await LN.getPending();
-      if(pending.notifications.length) await LN.cancel({ notifications: pending.notifications.map(n=>({id:n.id})) });
+      const current=Array.isArray(pending.notifications)?pending.notifications:[];
+      const reminders=current.filter(n=>isReminderNotificationId(n.id));
+      if(reminders.length) await LN.cancel({ notifications: reminders.map(n=>({id:n.id})) });
       if(!settings.reminderEnabled) return;
       let perm = await LN.checkPermissions();
-      if(perm.display !== 'granted'){ perm = await LN.requestPermissions(); if(perm.display !== 'granted') return; }
+      if(perm.display !== 'granted'){
+        perm = await LN.requestPermissions();
+        if(perm.display !== 'granted'){ showToast('Allow notifications in Android settings to receive class reminders'); return; }
+      }
       const parts = (settings.reminderTime||'19:00').split(':').map(Number);
       const h = Number.isInteger(parts[0]) ? Math.min(23, Math.max(0, parts[0])) : 19;
       const m = Number.isInteger(parts[1]) ? Math.min(59, Math.max(0, parts[1])) : 0;
@@ -4673,10 +4701,16 @@ ${sourceText}`;
         const missing=progress.missing.map(x=>x.count>1?`${x.name} (${x.count})`:x.name).join(', ');
         // Stable per-local-date IDs prevent collisions when the 14-day window is rebuilt.
         const dateId = Number(dateKey(at).replaceAll('-', '').slice(2));
-        list.push({ id:200000 + dateId, title:'Classmark', body:`Remember to mark: ${missing}`, schedule:{ at, allowWhileIdle:true } });
+        list.push({ id:200000 + dateId, title:'Classmark', body:`Remember to mark: ${missing}`, extra:{route:'home', reminderDate:dateKey(at)}, schedule:{ at, allowWhileIdle:true } });
       }
       if(list.length) await LN.schedule({ notifications:list });
-    }catch(e){}
+    };
+    const next=scheduleQueue.then(run,run);
+    scheduleQueue=next.catch(error=>{
+      console.error('Unable to schedule Android class reminders',error);
+      showToast('Unable to schedule class reminders');
+    });
+    return scheduleQueue;
   }
 
   let t=null;
@@ -4684,6 +4718,22 @@ ${sourceText}`;
     clearTimeout(t);
     t = setTimeout(()=>{ pushWidget(); scheduleReminders(); }, 600);
   };
+  if(LN){
+    try{
+      LN.addListener('localNotificationActionPerformed',event=>{
+        const notification=event&&event.notification;
+        if(!notification||(!isReminderNotificationId(notification.id)&&notification.extra?.route!=='home')) return;
+        try{ setActiveView(navItems.findIndex(item=>item.dataset.view==='home')); }
+        catch(error){ console.error('Unable to open the attendance view from a reminder',error); showToast('Reminder opened, but the attendance view could not be selected'); }
+      }).catch(error=>{
+        console.error('Unable to register Android reminder tap handler',error);
+        showToast('Reminder tap navigation is unavailable in this app build');
+      });
+    }catch(error){
+      console.error('Unable to register Android reminder tap handler',error);
+      showToast('Reminder tap navigation is unavailable in this app build');
+    }
+  }
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) window.pushWidgetSync(); });
   window.pushWidgetSync();
 })();

@@ -1,6 +1,6 @@
 # Classmark Updates
 
-**Last updated: November 19, 2026**
+**Last updated: November 20, 2026**
 
 This file tracks the major features and improvements added to Classmark.
 
@@ -118,7 +118,8 @@ Times below are repository commit times converted to IST (Asia/Kolkata).
 
 ### Current release state
 
-- Next release target: **Classmark v1.0.6**, generated from the successful Android workflow run after the privacy documentation update.
+- v1.0.6 is present as a repository tag, but is not a published GitHub Release. The latest published release is v1.0.3.
+- Next release candidate: **Classmark v1.0.7**. The branch build has passed; merge to protected `main` and publication still require owner review and explicit release approval.
 
 - Live web app: [classmark-attendance-nexus-9af5.vercel.app](https://classmark-attendance-nexus-9af5.vercel.app/)
 - GitHub release: [Classmark v1.0.0](https://github.com/chetanvhsk-wq/classmark-attendance/releases/tag/v1.0.0)
@@ -132,3 +133,17 @@ Times below are repository commit times converted to IST (Asia/Kolkata).
 - Web browser sign-in continues using the popup flow.
 - Firebase authorized domains and the Android package registration were verified in project attended-9480d.
 - Commit: 909f60d.
+
+## November 20, 2026 — v1.0.7 stability candidate
+
+- Audited browser and Android class reminders, including permission requests, rescheduling, notification payloads, and tap actions.
+- Replaced silent browser/Android notification failures with console diagnostics and visible in-app fallbacks.
+- Serialized Android reminder schedule updates and limited cancellation to Classmark-owned reminder IDs.
+- Added a validated reminder action payload that routes notification taps to the Home attendance view.
+- Verified the committed Class Mark logo remains the source artwork for the app, PWA, favicon, and Android icon generation; no icon asset replacement appeared in commit history.
+- Added a Stable Release redirect in the README and moved the problem/update logs into this folder.
+- Passed Android build workflow [44663156874](https://github.com/chetanvhsk-wq/classmark-attendance/actions/runs/44663156874); it generated and uploaded `classmark.apk` as the `attendance-apk` artifact.
+- Updated GitHub Actions to current Node 24-compatible major versions after CI surfaced Node 20 deprecation warnings.
+- Candidate state: **private repository; v1.0.7 is not published**. The latest published GitHub Release remains v1.0.3 until approval and publication.
+- CI now renames the generated APK to `classmark.apk` for the downloadable artifact and eventual release attachment.
+- The candidate pull request is awaiting the code-owner review required by `main` branch protection. The repository has no separate lint or test suite configured.

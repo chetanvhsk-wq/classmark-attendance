@@ -1,5 +1,5 @@
-"""Run after `npx cap add android`: injects the widget, plugin, permissions and app icon."""
-import os, re, shutil, sys
+"""Run after `npx cap add android`: injects the widget, permissions, icon and version."""
+import json, os, re, shutil, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MAIN = os.path.join(ROOT, "android", "app", "src", "main")
@@ -7,18 +7,36 @@ PKG_DIR = os.path.join(MAIN, "java", "com", "attendance", "app")
 if not os.path.isdir(PKG_DIR):
     sys.exit("android project not found - run `npx cap add android` first")
 
-# 1) Java sources (MainActivity is replaced so it registers the widget plugin)
+# 1) Keep the generated APK version aligned with package.json.
+with open(os.path.join(ROOT, "package.json"), encoding="utf8") as f:
+    version = json.load(f).get("version", "")
+match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", version)
+if not match:
+    sys.exit(f"package.json version must be numeric major.minor.patch, got {version!r}")
+major, minor, patch = (int(part) for part in match.groups())
+version_code = major * 10000 + minor * 100 + patch
+gradle_path = os.path.join(ROOT, "android", "app", "build.gradle")
+with open(gradle_path, encoding="utf8") as f:
+    gradle = f.read()
+gradle, code_count = re.subn(r"(?m)^(\s*versionCode\s+)\d+\s*$", rf"\g<1>{version_code}", gradle, count=1)
+gradle, name_count = re.subn(r'(?m)^(\s*versionName\s+")[^"]*("\s*)$', rf"\g<1>{version}\2", gradle, count=1)
+if code_count != 1 or name_count != 1:
+    sys.exit("could not set Android versionCode and versionName in android/app/build.gradle")
+with open(gradle_path, "w", encoding="utf8") as f:
+    f.write(gradle)
+
+# 2) Java sources (MainActivity is replaced so it registers the widget plugin)
 for f in os.listdir(os.path.join(ROOT, "overlay", "java")):
     shutil.copy(os.path.join(ROOT, "overlay", "java", f), os.path.join(PKG_DIR, f))
 
-# 2) Widget resources
+# 3) Widget resources
 for sub in ("layout", "drawable", "xml"):
     dst = os.path.join(MAIN, "res", sub)
     os.makedirs(dst, exist_ok=True)
     for f in os.listdir(os.path.join(ROOT, "overlay", "res", sub)):
         shutil.copy(os.path.join(ROOT, "overlay", "res", sub, f), os.path.join(dst, f))
 
-# 3) Manifest: widget receiver + notification permission
+# 4) Manifest: widget receiver + notification permission
 mpath = os.path.join(MAIN, "AndroidManifest.xml")
 m = open(mpath, encoding="utf8").read()
 if "AttendanceWidgetProvider" not in m:
@@ -39,7 +57,7 @@ for permission in (
         m = m.replace("</manifest>", f'    <uses-permission android:name="{permission}" />\n</manifest>')
 open(mpath, "w", encoding="utf8").write(m)
 
-# 4) Launcher icon from icon.png (replaces the default Capacitor icon)
+# 5) Launcher icon from icon.png (replaces the default Capacitor icon)
 try:
     from PIL import Image
     src = Image.open(os.path.join(ROOT, "icon.png")).convert("RGBA")
@@ -51,6 +69,6 @@ try:
         for name in ("ic_launcher.png", "ic_launcher_round.png", "ic_launcher_foreground.png"):
             img.save(os.path.join(folder, name))
     shutil.rmtree(os.path.join(MAIN, "res", "mipmap-anydpi-v26"), ignore_errors=True)
-except ImportError:
-    print("Pillow missing - keeping default icon (pip install pillow)")
+except ImportError as error:
+    sys.exit(f"Pillow is required to generate the Classmark launcher icon: {error}")
 print("patched OK")
