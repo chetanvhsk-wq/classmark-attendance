@@ -1,7 +1,7 @@
 # Problems overcome and stability record
 
 **Release candidate:** Classmark v1.0.7
-**Repository status:** Private; prepared as the most stable candidate to date, pending CI and release approval.
+**Repository status:** Private; prepared as the most stable candidate to date. Candidate Android build passed on the review branch; main merge and release approval are still pending.
 
 This log consolidates the problems documented in tracked commits and the previous project notes. It records confirmed fixes, not every unrecorded local incident. The release candidate adds notification error reporting, serialized rescheduling, reminder-owned cancellation, and tap-to-Home routing.
 
@@ -13,6 +13,8 @@ This log consolidates the problems documented in tracked commits and the previou
 - Added a validated reminder payload and action handler so tapping a Classmark reminder opens the Home attendance view.
 - Added visible handling for missing Android notification support, denied permission, schedule errors, and tap-handler registration errors.
 - Confirmed the source logo and web icon assets have been tracked unchanged since the initial app import; the existing Class Mark artwork remains the source for Android, PWA, favicon, and in-app use.
+- Generated Android metadata from the release package version (`versionName` 1.0.7 and `versionCode` 10007), and named the downloadable APK `classmark.apk`.
+- Passed the Android build workflow on the review branch; no GitHub Release or release tag has been created.
 
 This project evolved from a local attendance prototype into a synced web and Android app. The main problems solved were:
 
@@ -59,6 +61,8 @@ The earlier floating-plus removal was a temporary intermediate state; the curren
 
 - The latest published GitHub Release is [Classmark v1.0.3](https://github.com/chetanvhsk-wq/classmark-attendance/releases/tag/v1.0.3).
 - The repository also contains a v1.0.6 tag, but GitHub does not list a published release for that tag. v1.0.7 is the next unique candidate tag; it remains unpublished pending explicit approval.
+- Candidate CI: [Android build run 44663156874](https://github.com/chetanvhsk-wq/classmark-attendance/actions/runs/44663156874) passed and uploaded the `attendance-apk` artifact containing `classmark.apk`.
+- Main is protected by a required code-owner approval; the candidate PR cannot be merged until that review is recorded.
 - Release assets and workflow runs must be rechecked at publication time; historical links in older notes are not evidence of current availability.
 
 ## Current known limitation
@@ -66,3 +70,8 @@ The earlier floating-plus removal was a temporary intermediate state; the curren
 Native Google sign-in is intentionally hidden in the APK until a production signing certificate is used. Email/password and phone sign-in work in the APK. Google sign-in remains available on the web app.
 
 The Android Firebase configuration is supplied through the encrypted `GOOGLE_SERVICES_JSON` GitHub Actions secret. A previously exposed API key was removed from tracked source/configuration; any key that was publicly exposed should also be revoked and replaced in Google Cloud/Firebase.
+
+## Validation limitations
+
+- The repository has no configured lint or test suite; local JavaScript and Python syntax checks, workflow YAML, documentation links, package versions, and native icon/version generation were verified directly.
+- The installed production dependency graph reports seven npm audit advisories (one critical, five high, one moderate). Automated remediation would force major dependency changes, and the audit reports no fix for SheetJS `xlsx`; this was not changed in the release candidate.

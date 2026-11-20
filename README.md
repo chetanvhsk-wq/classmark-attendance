@@ -35,7 +35,7 @@ It answers one question: *how many classes can I skip, or how many do I need to 
 | Understand the fixes | [Problems overcome](problems%20and%20updates/problems.md) |
 | Run locally | [Run Locally](#run-locally) |
 
-> **Private production-stable repository:** v1.0.3 is the latest published GitHub Release. The v1.0.7 stability candidate is being verified and will not be published until explicitly approved.
+> **Private release candidate:** v1.0.3 is the latest published GitHub Release. The v1.0.7 candidate build passed on its review branch; main merge and release publication remain pending the required owner review and explicit release approval.
 
 Classmark requires a signed-in account to open the workspace. Sign in with Google, email/password, or phone verification; your attendance workspace then syncs securely across your devices.
 
