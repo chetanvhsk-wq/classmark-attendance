@@ -68,6 +68,187 @@ The login screen supports Google, email/password, and phone verification. Create
 
 > **Privacy note:** Attendance records and workspace settings sync only to the signed-in account. Timetable photos and wallpapers stay on-device even when sync is enabled.
 
+## UI preview
+
+> Illustrative mockup of the three main tabs. Try the real thing at the [live demo](https://classmark-attendance-nexus-9af5.vercel.app/).
+
+![Classmark UI overview: Home, Stats, and Settings](docs/screenshots/ui-overview.svg)
+
+| Tab | What you see |
+|---|---|
+| **Home** | Four editable cards (Overall, Subjects, Safe subjects, and animated Glyph), followed by subject cards with Present / Absent actions and can-skip / need-to-attend guidance |
+| **Stats** | This Week, Monthly Trend (Present %), 84-day Activity heatmap, Day Log, and Manage Subjects with sort options |
+| **Settings** | Account & sync, themes (Skeuomorphic / Glass / Matte / Normal), wallpaper, reminders, timetable, AI overview import, widget, and data export |
+
+---
+
+## How it works
+
+### 1. System architecture
+
+```mermaid
+flowchart LR
+    subgraph Client["Client (www/ single-page app)"]
+        UI["index.html<br/>UI + attendance logic"]
+        SYNC["firebase-sync.js<br/>Auth + Firestore client"]
+        VENDOR["vendor/<br/>jsPDF, SheetJS, Firebase SDK"]
+    end
+
+    subgraph Android["Android wrapper (Capacitor)"]
+        CAP["WebView shell"]
+        WIDGET["Home-screen widget<br/>(overlay/ native code)"]
+        NOTIF["Local Notifications"]
+    end
+
+    subgraph Cloud["Cloud services"]
+        AUTH["Firebase Auth<br/>Google / Email / Phone"]
+        FS[("Firestore<br/>per-user workspace")]
+        RULES{{"Firestore Security Rules<br/>owner-scoped access"}}
+        VERCEL["Vercel<br/>static www/ + api/ functions"]
+        PROXY["Gemini proxy<br/>Vercel or local server"]
+        GEMINI["Gemini API"]
+    end
+
+    UI --> SYNC
+    UI --- VENDOR
+    SYNC --> AUTH
+    SYNC -->|"workspace read / write"| FS
+    RULES -. "enforces per-user access" .-> FS
+    UI -->|"optional import content"| PROXY
+    PROXY -->|"server-side API key"| GEMINI
+    CAP --> UI
+    CAP --> WIDGET
+    CAP --> NOTIF
+    VERCEL -. "serves" .-> UI
+    VERCEL --> PROXY
+```
+
+### 2. Sign-in and sync flow
+
+```mermaid
+sequenceDiagram
+    actor S as Student
+    participant App as Classmark (www)
+    participant Auth as Firebase Auth
+    participant DB as Firestore
+
+    S->>App: Open app
+    App->>App: Restore sign-in session
+    alt No session
+        App->>S: Login gate (Google / email / phone)
+        S->>Auth: Sign in
+        Auth-->>App: User token
+    end
+    App->>DB: Load workspace (Firestore rules check owner)
+    DB-->>App: Attendance, courses, timetable, preferences
+    S->>App: Mark Present / Absent
+    App->>App: Recalculate percentage and guidance
+    App->>DB: Sync change
+    DB-->>App: Changes appear on other signed-in devices
+```
+
+### 3. Marking a class and the guidance it produces
+
+```mermaid
+flowchart TD
+    A([Tap Present / Absent<br/>or swipe the card]) --> B[Store mark for chosen date]
+    B --> C["Attendance % = Present / (Present + Absent)"]
+    C --> D{"At or above target?"}
+    D -- Yes --> E["On track<br/>Can skip = floor(P / T - total)"]
+    D -- No --> F["Need to attend<br/>n = ceil((T x total - P) / (1 - T))"]
+    E --> G[Update Home, Stats, and widget]
+    F --> G
+    G --> H[Sync to Firestore]
+    B -. "mistake" .-> U[Undo or edit past entries]
+    U --> C
+```
+
+*P = present, T = target as a fraction (75% = 0.75), and total = present + absent.*
+
+### 4. Importing attendance (local first, optional AI fallback)
+
+```mermaid
+flowchart TD
+    P["Paste an attendance table<br/>or choose a screenshot"] --> L{"Recognized locally?"}
+    L -- Yes --> R["Parse on device<br/>(no Gemini key needed)"]
+    L -- No --> K{"Gemini configured<br/>on the server?"}
+    K -- Yes --> V["Send chosen content to<br/>Vercel or local proxy"]
+    V --> GM["Gemini suggests attendance rows"]
+    GM --> R
+    K -- No --> X["Enter courses manually"]
+    R --> RV["Review courses<br/>(Present + Absent counts)"]
+    RV --> AP["Apply attendance"]
+    AP --> SY["Sync to Firestore"]
+```
+
+### 5. App screen map
+
+```mermaid
+flowchart LR
+    Gate["Login gate"] --> Home
+    subgraph Tabs["Bottom navigation"]
+        Home["Home"]
+        Stats["Stats"]
+        Settings["Settings"]
+    end
+    Home --> Sub["Subject sheet:<br/>Present / Absent / History"]
+    Home --> Add["New subject"]
+    Home --> Edit["Edit subject:<br/>counts, specific dates, colour"]
+    Home --> Card["Edit Home card"]
+    Stats --> Trend["Weekly + monthly trend"]
+    Stats --> Heat["84-day heatmap"]
+    Stats --> Log["Day log"]
+    Stats --> Manage["Manage subjects + sort"]
+    Settings --> Acc["Account & sync"]
+    Settings --> Theme["Themes, fonts, colour, wallpaper"]
+    Settings --> Rem["Reminders + timetable"]
+    Settings --> Imp["AI overview import"]
+    Settings --> Data["Export: JSON / CSV / PDF / Excel<br/>Import / Reset"]
+```
+
+### 6. Build and deploy pipeline
+
+```mermaid
+flowchart LR
+    Push["git push"] --> GH["GitHub"]
+    GH --> Vercel["Vercel:<br/>bundle vendor libraries, publish www/<br/>and deploy api/ functions"]
+    GH --> CI["GitHub Actions:<br/>Build Android APK"]
+    CI --> S1["npm ci, npx cap add android"]
+    S1 --> S2["scripts/patch_android.py<br/>(widget, permissions, icons)"]
+    S2 --> S3["npx cap sync android"]
+    S3 --> S4["gradlew assembleDebug"]
+    S4 --> APK[("classmark.apk artifact")]
+    Secret["GOOGLE_SERVICES_JSON secret"] -. "written during build only" .-> S2
+    Vercel --> Live(["Live web app"])
+```
+
+### 7. Data and privacy boundaries
+
+```mermaid
+flowchart LR
+    subgraph Synced["Synced to your account (Firestore)"]
+        A1[Attendance records]
+        A2[Course totals + dated marks]
+        A3[Weekly timetable]
+        A4[Selected preferences]
+    end
+    subgraph Device["Stays on this device"]
+        D1[Timetable photos]
+        D2[Wallpapers]
+        D3[Local workspace copy]
+    end
+    subgraph Optional["Optional AI processing"]
+        I1["Content you choose to submit"]
+        P1["Server-side Gemini proxy"]
+        G1[Gemini API]
+        I1 --> P1 --> G1
+    end
+    subgraph Server["Server only"]
+        K1["GEMINI_API_KEY"]
+    end
+    K1 -. "key used only by proxy" .-> P1
+```
+
 ## Why it is useful
 
 Most attendance apps only show a percentage. Classmark turns that percentage into a clear decision: **am I safe to miss the next class, or do I need to attend?** It is designed for quick updates between classes, with detailed history available when you need to check your records.
