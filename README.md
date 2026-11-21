@@ -37,11 +37,15 @@ It answers one question: *how many classes can I skip, or how many do I need to 
 | Data handling and privacy rights | [Privacy Policy](www/privacy.html) |
 | Run locally | [Run Locally](#run-locally) |
 
-> **Private release candidate:** v1.0.3 is the latest published GitHub Release. The v1.0.7 candidate build passed on its review branch; main merge and release publication remain pending the required owner review and explicit release approval.
+> **Latest stable GitHub release:** v1.0.7 is published on GitHub and includes the latest Android APK. It remains a debug-signed APK and is not a Play Store release.
 
 Classmark requires a signed-in account to open the workspace. Sign in with Google, email/password, or phone verification; your attendance workspace then syncs securely across your devices.
 
 > **One account, every device:** Sign up once with Google or email/password and use that same account anywhere. Google-created accounts can also be given an email/password login from Firebase, so email/password remains a backup if Google sign-in is unavailable. Attendance, timetable, preferences, and other synced changes are reflected across every device signed in to the same account.
+
+### Latest update
+
+The v1.0.7 release adds more reliable class reminders, including Android and browser notification fallbacks and tap-to-attendance navigation. It also updates the GitHub Actions toolchain, standardizes the downloadable APK name as `classmark.apk`, preserves the verified Classmark branding across web and Android surfaces, and adds release signing diagnostics.
 
 ## How to use it
 
@@ -285,6 +289,10 @@ That said, what I built goes well beyond a surface-level fork. The original was 
 - Stats: trend graph, 84-day heatmap, weekly recap with a shareable image, day log, subject reordering
 - Reminders via Android Local Notifications or Web Notifications in the browser
 - Native Android home-screen widget showing overall % and up to 4 subjects
+- Timetable photos or screenshots with optional Gemini extraction, plus manual timetable editing
+- Local and optional Gemini-assisted attendance import with a review step before applying changes
+- Account deletion for the Firebase Auth user and synced workspace
+- Liquid-glass bottom navigation across all interface styles
 - Export/import as JSON, CSV, PDF, and Excel — Android uses the system share sheet, web downloads normally
 - Light/dark themes with multiple UI styles and accent colors
 - Required Firebase Authentication — email/password, Google, or phone sign-in
@@ -308,7 +316,7 @@ The workflow runs on every push. You can also trigger it manually via **Run work
 
 ## Run Locally
 
-**Requirements:** Node 20+, JDK 17, Android SDK (platform + build-tools), Python 3 + Pillow.
+**Requirements:** Node 22+, JDK 17, Android SDK (platform + build-tools), Python 3 + Pillow.
 
 ### Web preview
 
