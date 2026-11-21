@@ -501,9 +501,14 @@ body.ui-skeu.tone-light .timetable-import-row button{background:rgba(0,0,0,.06);
 .auth-gate-heading .eyebrow{font-size:10px;letter-spacing:.15em;text-transform:uppercase;font-weight:800;color:rgb(var(--accent));margin-bottom:9px;}
 .auth-gate-heading h1{font-size:clamp(28px,8vw,38px);letter-spacing:-.05em;margin:0 0 8px;}
 .auth-gate-heading p{margin:0;color:rgba(245,247,251,.62);font-size:14px;line-height:1.55;}
-.auth-gate-wait{text-align:center;padding:24px;color:rgba(245,247,251,.7);font-size:13px;}
-.auth-gate-wait::before{content:'';display:block;width:22px;height:22px;margin:0 auto 12px;border:2px solid rgba(255,255,255,.14);border-top-color:rgb(var(--accent));border-radius:50%;animation:authSpin .8s linear infinite;}
-@keyframes authSpin{to{transform:rotate(360deg)}}
+.auth-gate-wait{position:relative;text-align:center;padding:24px;color:rgba(245,247,251,.7);font-size:13px;}
+.auth-gate-wait::before{content:'';display:block;width:58px;height:58px;margin:0 auto 14px;border-radius:17px;background:url('icon-192.png') center/contain no-repeat;filter:drop-shadow(0 8px 16px rgba(0,0,0,.24));}
+.auth-gate-wait::after{content:'';position:absolute;top:24px;left:50%;width:58px;height:58px;border:1px solid rgba(255,255,255,.44);border-radius:17px;background:linear-gradient(110deg,transparent 28%,rgba(255,255,255,.62) 45%,rgba(255,255,255,.1) 56%,transparent 69%) 180% 0/230% 100%,linear-gradient(145deg,rgba(255,255,255,.24),rgba(255,255,255,.015) 72%);box-shadow:inset 0 1px 7px rgba(255,255,255,.28),0 8px 24px rgba(var(--accent),.14);backdrop-filter:blur(2px) saturate(1.35);pointer-events:none;opacity:0;transform:translateX(-50%) scale(.78);}
+.auth-gate.is-loading .auth-gate-wait::before{animation:authLogoReveal 3.2s cubic-bezier(.2,.75,.2,1) infinite;}
+.auth-gate.is-loading .auth-gate-wait::after{animation:authLiquidLens 3.2s cubic-bezier(.2,.75,.2,1) infinite;}
+@keyframes authLogoReveal{0%,100%{transform:scale(.82);filter:blur(1px) drop-shadow(0 6px 12px rgba(0,0,0,.2));}28%{transform:scale(1.1);filter:blur(0) saturate(1.15) drop-shadow(0 10px 20px rgba(var(--accent),.28));}52%{transform:scale(.96);filter:blur(0) saturate(1.05) drop-shadow(0 7px 16px rgba(var(--accent),.2));}72%{transform:scale(1);filter:blur(0) drop-shadow(0 6px 14px rgba(0,0,0,.22));}}
+@keyframes authLiquidLens{0%,100%{opacity:.18;transform:translateX(-50%) scale(.78);background-position:180% 0,0 0;}28%{opacity:.95;transform:translateX(-50%) scale(1.08);background-position:100% 0,0 0;}60%{opacity:.64;transform:translateX(-50%) scale(.98);background-position:-25% 0,0 0;}75%{opacity:.34;transform:translateX(-50%) scale(1);background-position:-80% 0,0 0;}}
+@media(prefers-reduced-motion:reduce){.auth-gate.is-loading .auth-gate-wait::before,.auth-gate.is-loading .auth-gate-wait::after{animation:none;}}
 .auth-gate-error{min-height:20px;margin:10px 2px 0;color:#ff9d9d;font-size:12px;text-align:center;line-height:1.4;}
 .auth-gate-foot{text-align:center;margin-top:16px;color:rgba(245,247,251,.42);font-size:11px;line-height:1.5;}
 .auth-gate-local{margin:7px 0 0;text-align:center;color:rgba(245,247,251,.5);font-size:11px;}
@@ -1659,7 +1664,7 @@ body.ui-matte .card::before,body.ui-normal .card::before,body.ui-matte .card::af
 </style>
 </head>
 <body>
-<div class="auth-gate open" id="authGate" role="dialog" aria-modal="true" aria-labelledby="authGateTitle" tabindex="-1">
+<div class="auth-gate open is-loading" id="authGate" role="dialog" aria-modal="true" aria-labelledby="authGateTitle" tabindex="-1">
   <div class="auth-gate-inner">
     <div class="auth-gate-brand"><span class="auth-gate-brand-mark"><img src="icon-192.png" alt="" aria-hidden="true"></span>Classmark</div>
     <div class="auth-gate-heading">
@@ -4771,6 +4776,7 @@ window.setClassmarkAuthGate = mode=>{
   const cardTitle=document.getElementById('cloudCardTitle');
   const help=document.getElementById('cloudSyncHelp');
   if(!gate||!group) return;
+  gate.classList.toggle('is-loading',mode==='loading');
   if(mode==='signedIn'){
     if(slot) slot.appendChild(group);
     gate.classList.remove('open');
