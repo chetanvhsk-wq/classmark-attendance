@@ -33,6 +33,8 @@ It answers one question: *how many classes can I skip, or how many do I need to 
 | Install Android | [Latest Stable Release](https://github.com/chetanvhsk-wq/classmark-attendance/releases/latest) |
 | See what changed | [Updates](problems%20and%20updates/updates.md) |
 | Understand the fixes | [Problems overcome](problems%20and%20updates/problems.md) |
+| Security reporting and guidance | [Security Policy](SECURITY.md) |
+| Data handling and privacy rights | [Privacy Policy](www/privacy.html) |
 | Run locally | [Run Locally](#run-locally) |
 
 > **Private release candidate:** v1.0.3 is the latest published GitHub Release. The v1.0.7 candidate build passed on its review branch; main merge and release publication remain pending the required owner review and explicit release approval.
@@ -169,7 +171,7 @@ Add your `*.vercel.app` hostname to **Firebase Authentication → Settings → A
 
 ## Data & Privacy
 
-Read the [Classmark Privacy Policy](www/privacy.html). It is also linked from the login gate and Settings. Signed-in users can delete their Firebase Authentication account and synced Firestore workspace from **Settings → Account & sync → Delete account and data**. Play Console privacy, Data safety, and other acknowledgement forms still require completion in the developer account before publishing.
+Read the [Classmark Privacy Policy](www/privacy.html) and [Security Policy](SECURITY.md). The privacy policy is also linked from the login gate and Settings. Signed-in users can delete their Firebase Authentication account and synced Firestore workspace from **Settings → Account & sync → Delete account and data**. Play Console privacy, Data safety, and other acknowledgement forms still require completion in the developer account before publishing.
 
 - Attendance records, course totals, dated marks, timetable, and preferences sync to Firestore. Security rules restrict every account strictly to its own workspace.
 - The Gemini API key is read server-side only — `.env` locally, Vercel environment in production. Never sent to the browser or written to Firestore.

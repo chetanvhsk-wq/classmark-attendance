@@ -17,34 +17,70 @@
   <a class="back" href="index.html">← Back to Classmark</a>
   <article>
     <h1>Classmark Privacy Policy</h1>
-    <p class="updated">Last updated: November 19, 2026</p>
-    <p>Classmark is an attendance tracker maintained by Chetan Venugopala. This policy explains what information Classmark handles when you use the web app or Android app.</p>
+    <p class="updated">Last updated: November 21, 2026</p>
+    <p>Classmark is an attendance tracker maintained by Chetan Venugopala. This notice describes how personal information is handled when you use the Classmark web app or Android app. It is intended to explain the current product; it is not legal advice.</p>
+
+    <h2>Who is responsible</h2>
+    <p>The Classmark maintainer is responsible for deciding why and how information is used for the service (the data controller under UK data-protection law). For privacy requests, contact the maintainer through the <a href="https://github.com/chetanvhsk-wq/classmark-attendance/issues" rel="noopener">Classmark GitHub project</a>. Do not put attendance records, account credentials, or other sensitive information in a public issue. If you cannot use the app to delete your account, ask for a private contact route without including those details.</p>
 
     <h2>Information we handle</h2>
     <ul>
-      <li><strong>Account information:</strong> email address, phone number, display name, and the authentication identifiers supplied by Firebase Authentication when you sign in.</li>
-      <li><strong>Synced workspace data:</strong> subjects, attendance counts and records, targets, timetable entries, and selected preferences. This is stored in your user-scoped Firestore workspace so the same account can work across devices.</li>
-      <li><strong>Device-only data:</strong> wallpapers, timetable photos, and Gemini configuration are kept on the device and are not written to the synced Firestore workspace.</li>
-      <li><strong>Import data:</strong> standard Attended/Total tables are read locally in the app. Classmark asks for permission before sending complex text or images to the Gemini processing service.</li>
+      <li><strong>Account information:</strong> your email address, phone number, display name, and Firebase Authentication account identifier, depending on the sign-in method you use. Google sign-in is provided through Google/Firebase; phone sign-in may involve verification messages.</li>
+      <li><strong>Synced workspace:</strong> subject names and codes, attendance totals and dated records, attendance targets, weekly timetable entries, and selected appearance and reminder preferences. This is stored in a Firestore document associated with your Firebase account.</li>
+      <li><strong>Device and browser data:</strong> the app keeps a local copy of workspace information and settings so it can work on that device. Wallpapers, timetable photos, and imported/exported files are not included in the synced workspace. Local copies remain until removed or browser/app storage is cleared.</li>
+      <li><strong>Content you submit for optional AI processing:</strong> supported attendance tables are parsed on your device. If local parsing cannot read content, you can choose to send the text or image to Gemini for a suggested result. Timetable photos are sent only when you choose the photo-reading action. Review any result before applying it.</li>
+      <li><strong>Technical service data:</strong> Firebase, Vercel, Google, or other infrastructure providers may process technical information such as IP address, device/browser information, request details, and diagnostic or security logs to operate and protect their services. Classmark does not currently configure in-app analytics or advertising tracking.</li>
+    </ul>
+    <p>Please do not enter another person's information unless you have permission and a valid reason to do so. Attendance data can reveal details about a student's activities.</p>
+
+    <h2>Why we use information and our lawful bases</h2>
+    <ul>
+      <li><strong>Provide your account and requested app features:</strong> sign-in, workspace sync, attendance calculations, and user-requested imports/exports. The basis is that processing is necessary to provide the service you request (UK GDPR contract basis).</li>
+      <li><strong>Optional Gemini processing:</strong> where you choose to send content to Gemini, the basis is your consent for that optional processing. You can decline and use manual entry or local parsing instead. Once sent, the content is processed by Google under its applicable service terms and cannot be recalled from that provider by Classmark.</li>
+      <li><strong>Reminders:</strong> reminders are enabled by you and use the timetable and reminder time you set. Android notifications are scheduled on-device; browser notifications depend on your browser and whether Classmark is open.</li>
+      <li><strong>Operate and protect the service:</strong> providers may use necessary technical data for reliability, troubleshooting, and security. Where the maintainer relies on legitimate interests for this processing, those interests are operating and protecting the service, balanced against your rights.</li>
     </ul>
 
-    <h2>How information is used</h2>
-    <p>We use this information to authenticate you, sync your attendance workspace, calculate attendance guidance, send reminders when you enable them, and provide imports and exports that you request. Classmark does not sell your personal information.</p>
+    <h2>Who receives information</h2>
+    <ul>
+      <li><strong>Google Firebase:</strong> account authentication and Firestore workspace synchronization.</li>
+      <li><strong>Vercel:</strong> web hosting and serverless Gemini proxy hosting.</li>
+      <li><strong>Google Gemini:</strong> only the content you choose to submit for optional AI processing. The Gemini API key is held server-side and is not sent to your browser.</li>
+      <li><strong>Google sign-in or phone verification providers:</strong> when you choose those authentication methods.</li>
+    </ul>
+    <p>Classmark does not sell personal information. Provider processing is also subject to the providers' own terms and privacy notices: <a href="https://policies.google.com/privacy" rel="noopener">Google Privacy Policy</a>, <a href="https://firebase.google.com/support/privacy" rel="noopener">Firebase privacy and security</a>, and <a href="https://vercel.com/legal/privacy-policy" rel="noopener">Vercel Privacy Policy</a>.</p>
 
-    <h2>Service providers</h2>
-    <p>Firebase Authentication and Cloud Firestore provide account and sync services. Vercel hosts the web app and server functions. When you explicitly approve Gemini processing for a complex import, the requested import content is sent through the server-side Gemini proxy to produce a preview. The Gemini API key is not sent to your browser.</p>
+    <h2>International processing</h2>
+    <p>These providers operate services in multiple countries. Information may be processed outside the UK depending on provider infrastructure and configuration. The maintainer has not verified and published the exact processing locations or transfer safeguards configured for every provider. Before relying on the service for UK deployments, review the current provider contracts, data-location settings, and any UK transfer safeguards that apply. See the ICO's guidance on <a href="https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/international-transfers/" rel="noopener">international transfers</a>. Contact the maintainer if you need more information.</p>
 
-    <h2>Security and retention</h2>
-    <p>Firestore access is restricted by the signed-in user ID and the app uses HTTPS in production. Synced workspace data remains while your account exists or until you delete it. Device-only data remains on your device until you remove it or clear the app/browser data.</p>
+    <h2>How long information is kept</h2>
+    <ul>
+      <li><strong>Synced account and workspace:</strong> kept while your account remains active. When you use Delete account and data, Classmark deletes the workspace document and Firebase Authentication account. Any provider backups or operational logs may remain for the period set by that provider.</li>
+      <li><strong>Device-only information:</strong> kept on your device until you remove it, clear browser/app data, or uninstall the Android app. Uninstalling may remove local information; export a backup first if you need one.</li>
+      <li><strong>Provider logs and Gemini requests:</strong> retained under the relevant provider's current settings and retention terms. Classmark does not set or promise a separate retention period for those provider records.</li>
+      <li><strong>Exports:</strong> files you download or share are under your control; deleting an account does not delete copies you saved elsewhere.</li>
+    </ul>
 
-    <h2>Delete your account</h2>
-    <p>In Classmark, open <strong>Settings → Account &amp; sync → Delete account and data</strong>. After confirmation, Classmark deletes your synced workspace and Firebase Authentication account, then signs you out. A recent sign-in may be required for security. You can contact the maintainer through the <a href="https://github.com/chetanvhsk-wq/classmark-attendance/issues" rel="noopener">Classmark issue tracker</a> if you cannot access the app.</p>
+    <h2>Your UK data-protection rights</h2>
+    <p>Depending on the circumstances and lawful basis, you may have the right to request access to, correction or deletion of your personal information, restriction of processing, or a copy in a portable format. Where processing is based on consent, you can withdraw it at any time for future processing by declining further optional Gemini submissions; this does not affect processing that already took place. To exercise a right or raise a concern, contact the maintainer using the route above. You can also complain to the <a href="https://ico.org.uk/make-a-complaint/" rel="noopener">Information Commissioner's Office (ICO)</a>.</p>
 
-    <h2>Children</h2>
-    <p>Classmark is intended for students and is not directed at children under 13. Do not create an account for someone who is not permitted to use the service in their region.</p>
+    <h2>Your right to object</h2>
+    <p>You have the right to object to processing based on legitimate interests. If you object, the maintainer will stop that processing unless there are compelling legitimate grounds to continue or the information is needed for legal claims. Contact the maintainer using the route above to make an objection.</p>
 
-    <h2>Contact</h2>
-    <p>For privacy questions or deletion assistance, use the <a href="https://github.com/chetanvhsk-wq/classmark-attendance/issues" rel="noopener">Classmark issue tracker</a>. Do not post attendance records, passwords, phone numbers, or other private information in a public issue.</p>
+    <h2>Automated processing</h2>
+    <p>Classmark calculates attendance percentages and guidance from the records you enter. Optional Gemini imports can suggest timetable or attendance data, but you can review the result before applying it. Classmark does not make solely automated decisions that produce legal effects or similarly significant effects about you.</p>
+
+    <h2>Account deletion</h2>
+    <p>In Classmark, open <strong>Settings → Account &amp; sync → Delete account and data</strong> and confirm. Classmark deletes your synced workspace document and Firebase Authentication account. A recent sign-in may be required. This action does not erase device-only data, downloaded exports, or records retained by providers under their own policies. If you cannot access the app, contact the maintainer without posting personal data publicly.</p>
+
+    <h2>Children and education use</h2>
+    <p>Classmark is designed for students and is not intended for children under 13. The current app does not verify age or provide a parental-consent workflow; do not create an account for a child under 13. If a school or other institution arranges use, it should determine its role and responsibilities under applicable data-protection law before students use the service. The maintainer should assess whether the UK Age Appropriate Design Code applies to the service's likely users.</p>
+
+    <h2>Cookies and similar storage</h2>
+    <p>Classmark uses browser/device storage for app data, settings, and sign-in persistence needed to provide the service. It does not currently configure advertising cookies or in-app analytics. Your browser, Firebase sign-in flow, or hosting providers may use additional storage or technical mechanisms; consult their notices and your browser controls.</p>
+
+    <h2>Changes and contact</h2>
+    <p>This notice may change as the app and its providers change. The latest version is published on this page. For privacy questions or account-deletion help, contact the maintainer through the <a href="https://github.com/chetanvhsk-wq/classmark-attendance/issues" rel="noopener">Classmark GitHub project</a>; do not include passwords, phone numbers, attendance records, or other private information in a public issue. The maintainer will arrange a private route when needed.</p>
   </article>
 </main>
 </body>
