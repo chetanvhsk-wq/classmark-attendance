@@ -2023,6 +2023,7 @@ body.ui-matte .card::before,body.ui-normal .card::before,body.ui-matte .card::af
           <button class="util-btn" id="exportXlsxBtn">📊 Excel</button>
         </div>
         <button class="util-btn" id="importBtn" style="margin-top:2px;">⬆️ Import data from file</button>
+        <button class="util-btn" id="rollbackImportBtn" type="button" style="display:none;margin-top:8px;">↩️ Undo last import</button>
         <button class="util-btn danger" id="resetBtn">🗑️ Reset all data</button>
       </div>
     </div>
@@ -2303,6 +2304,7 @@ body.ui-matte .card::before,body.ui-normal .card::before,body.ui-matte .card::af
 const STORE_KEY = 'attend_data_v4';
 const SETTINGS_KEY = 'attend_settings_v4';
 const ONB_KEY = 'attend_onboarded_v1';
+const IMPORT_ROLLBACK_KEY = 'attend_import_rollback_v1';
 const accents = [
   {name:'red', rgb:'255,110,110'},
   {name:'blue', rgb:'122,162,255'},
@@ -2343,6 +2345,11 @@ function save(){
   if(window.classmarkCloudSync && typeof window.classmarkCloudSync.schedule === 'function') window.classmarkCloudSync.schedule();
   if(typeof window.pushWidgetSync === 'function') window.pushWidgetSync();
 }
+function cloneState(value){ return JSON.parse(JSON.stringify(value)); }
+function loadImportRollback(){ const checkpoint=load(IMPORT_ROLLBACK_KEY,null); return checkpoint&&checkpoint.state&&Array.isArray(checkpoint.state.subjects)?checkpoint:null; }
+function updateRollbackAction(){ const button=document.getElementById('rollbackImportBtn'); if(!button)return; const checkpoint=loadImportRollback(); button.style.display=checkpoint?'':'none'; button.disabled=!checkpoint; if(checkpoint) button.textContent=`↩️ Undo last import${checkpoint.subjectCount!=null?` (${checkpoint.subjectCount} subjects)`:''}`; }
+function setImportRollback(checkpoint){ try{localStorage.setItem(IMPORT_ROLLBACK_KEY,JSON.stringify(checkpoint));}catch(e){showToast('Could not save the import rollback point');} updateRollbackAction(); }
+function clearImportRollback(){ try{localStorage.removeItem(IMPORT_ROLLBACK_KEY);}catch(e){} updateRollbackAction(); }
 /* Keep a valid, minimal target so percentage math never divides by zero. */
 function clampTarget(v, fallback){
   const n = parseInt(v, 10);
@@ -2896,13 +2903,24 @@ document.getElementById('importInput').onchange = (e)=>{
         alert('That backup has no valid subjects. Nothing was imported.');
         return;
       }
-      state = normalized; save(); renderAll();
       const dropped = parsed.subjects.length - normalized.subjects.length;
-      showToast(dropped > 0 ? `Imported ${normalized.subjects.length} subjects (${dropped} invalid skipped)` : 'Data imported');
+      const summary = dropped > 0 ? `${normalized.subjects.length} subjects (${dropped} invalid skipped)` : `${normalized.subjects.length} subjects`;
+      showConfirm('Import this backup?', `This will replace the current attendance workspace with ${summary}. You can undo this import from Export & Data.`, ()=>{
+        setImportRollback({state:cloneState(state),subjectCount:state.subjects.length,createdAt:new Date().toISOString()});
+        state=normalized; save(); renderAll();
+        showToast(dropped > 0 ? `Imported ${normalized.subjects.length} subjects (${dropped} invalid skipped)` : 'Data imported');
+      });
     }catch(err){ alert('Could not read that file as an Attendance backup.'); }
     finally { e.target.value = ''; }
   };
   reader.readAsText(file);
+};
+document.getElementById('rollbackImportBtn').onclick=()=>{
+  const checkpoint=loadImportRollback(); if(!checkpoint){updateRollbackAction();return;}
+  showConfirm('Undo last import?','Restore the exact workspace from before the last import? Changes made after that import will be replaced.',()=>{
+    state=normalizeState(checkpoint.state); clearImportRollback(); save(); renderAll();
+    if(window.renderClassTimetable) window.renderClassTimetable(); showToast('Import undone');
+  });
 };
 document.getElementById('resetBtn').onclick = ()=>{
   showConfirm('Reset everything?', "Delete all subjects and attendance data? This can't be undone unless you exported a backup.", ()=>{
@@ -4253,6 +4271,7 @@ document.getElementById('confirmOkBtn').onclick = ()=>{
 /* ---------- Render all ---------- */
 function renderAll(){
   renderStats(); renderHero(); renderSubjects(); renderHomeCards(); renderGraphSelect(); renderGraph();
+  updateRollbackAction();
   renderHeatSelect(); renderHeatmap(); syncAccentDots(); updateSettingsSummaries();
   renderWeekRecap(); renderDayLog(); renderReorderList();
 }
@@ -4484,6 +4503,7 @@ ${sourceText}`;
         items=aiItems.map(x=>({name:x.appName||x.erpName,code:x.code||'',present:x.present,absent:x.absent,total:x.present+x.absent,appName:x.appName}));
       }catch(e){
         if(!items.length){
+          openGuide();
           $('aiPreviewTitle').textContent='Could not read this table';
           $('aiPreviewRows').innerHTML='<p class="h3-sub">Classmark could not read the portal table right now. You can add the subjects manually instead.</p><button class="util-btn" type="button" id="aiAddManuallyBtn">Add manually</button>';
           $('aiPreview').style.display='block';
@@ -4491,9 +4511,11 @@ ${sourceText}`;
           showToast('Classmark could not finish the import');
           return;
         }
-        showToast('Gemini could not finish; showing locally recognized rows for review');
+          openGuide();
+          showToast('Gemini could not finish; showing locally recognized rows for review');
       }
     }else if(attendanceImage){
+      openGuide();
       showToast('Gemini is not configured for this website yet. You can still add the schedule manually.'); return;
     }
     if(!items.length){ showToast('Could not read this format. Copy the table with its column headings or upload a screenshot.'); return; }

@@ -91,7 +91,8 @@ const server = http.createServer(async (req, res) => {
 
   const url = new URL(req.url, 'http://localhost');
   if (url.pathname === '/api/gemini/status' && req.method === 'GET') {
-    return sendJson(res, 200, { configured: Boolean(process.env.GEMINI_API_KEY), model: process.env.GEMINI_MODEL || DEFAULT_MODEL });
+    const configured = Array.from({ length: 5 }, (_, index) => process.env[`GEMINI_API_KEY_${index + 1}`]).some(Boolean) || Boolean(process.env.GEMINI_API_KEY);
+    return sendJson(res, 200, { configured, model: process.env.GEMINI_MODEL || DEFAULT_MODEL });
   }
   if (url.pathname === '/api/gemini/generate' && req.method === 'POST') return handleGenerate(req, res);
   if (url.pathname.startsWith('/api/')) return sendJson(res, 404, { error: 'API route not found.' });
