@@ -286,19 +286,22 @@ window.classmarkGetIdToken = async () => {
   if (!activeUser) throw new Error('Sign in to use Gemini features.');
   return activeUser.getIdToken();
 };
+// Keep the startup screen visible briefly so the app opens with a consistent,
+// calm transition even when Firebase resolves immediately from cached auth.
+const startupSplash = new Promise(resolve => setTimeout(resolve, 2000));
 window.setClassmarkAuthGate?.('loading');
-onAuthStateChanged(auth, async user => {
+const handleAuthState = async user => {
   stopWorkspaceListener?.();
   stopWorkspaceListener = null;
   activeUser = user;
   if (!user) {
     lastCloudSignature = '';
     showStatus('Signed out', false);
+    await startupSplash;
     window.setClassmarkAuthGate?.('signedOut');
     if ($('cloudUserLabel')) $('cloudUserLabel').textContent = '';
     return;
   }
-  window.setClassmarkAuthGate?.('signedIn');
   if ($('cloudUserLabel')) $('cloudUserLabel').textContent = user.email || user.phoneNumber || user.displayName || 'Signed-in account';
   showStatus('Connecting…');
   try { await startWorkspaceSync(user); }
@@ -306,7 +309,9 @@ onAuthStateChanged(auth, async user => {
     console.error('[Classmark cloud connect]', error);
     showStatus('Sync unavailable · data stays on this device');
   }
-});
+  startupSplash.then(() => window.setClassmarkAuthGate?.('signedIn'));
+};
+onAuthStateChanged(auth, handleAuthState);
 
 window.addEventListener('online', () => {
   if (!activeUser) return;

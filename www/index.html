@@ -689,6 +689,8 @@ body.ui-skeu.tone-light .csel-btn{ background:rgba(0,0,0,0.05); border-color:rgb
   max-height:0; opacity:0; pointer-events:none; transform:translateY(-4px) scale(0.98); transform-origin:top center;
   transition:max-height 180ms var(--ease-standard), opacity 150ms ease, transform 180ms var(--ease-standard); }
 .csel-panel.open{ max-height:260px; overflow-y:auto; opacity:1; pointer-events:auto; transform:translateY(0) scale(1); }
+.csel-panel,.sheet,.tp-col{ scrollbar-width:none; overscroll-behavior:contain; }
+.csel-panel::-webkit-scrollbar,.sheet::-webkit-scrollbar,.tp-col::-webkit-scrollbar{ display:none; width:0; height:0; }
 body.ui-skeu.tone-light .csel-panel{ background:rgb(245,246,249); border-color:rgba(0,0,0,0.1); }
 .csel-opt{ padding:12px 14px; font-size:14px; cursor:pointer; color:#fff; }
 body.ui-skeu.tone-light .csel-opt{ color:rgb(var(--text)); }
@@ -830,6 +832,19 @@ button{ touch-action:manipulation; }
   .subject-card{padding-left:14px;padding-right:14px;}
   .stats-grid{gap:9px;}
   .stat-card{padding:14px;}
+  .overlay{align-items:flex-end;padding:0;}
+  .overlay .sheet{width:100%;max-width:none;max-height:calc(100dvh - env(safe-area-inset-top,0px) - 10px);padding:18px 14px calc(18px + env(safe-area-inset-bottom,0px));border-radius:22px 22px 0 0;}
+  .sheet h3{font-size:17px;margin-bottom:12px;}
+  .sheet-actions{flex-wrap:wrap;gap:8px;}
+  .sheet-actions .btn{min-width:0;flex:1 1 120px;padding:12px 10px;font-size:14px;}
+  #editOverlay .sheet > div[style*="display:flex"]{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px !important;}
+  #editOverlay .edit-cal-legend{gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+  #editOverlay .edit-cal-grid{gap:2px;}
+  #editOverlay .edit-cal-day{min-height:34px;font-size:12px;}
+  .edit-cal-nav{margin-bottom:6px;}
+  .edit-cal-dow{font-size:9px;}
+  .timetable-entry-form{gap:7px;}
+  .timetable-entry-form .csel-btn{padding:11px 12px;font-size:13px;}
 }
 
 /* Classmark refresh: calm campus dashboard, with all existing controls and handlers retained. */
@@ -1224,6 +1239,7 @@ body.tone-dark .nav-item.active{color:#fff !important;text-shadow:0 1px 8px rgba
   .navbar-inner{gap:2px;padding:6px;min-height:64px;}
   .nav-item{gap:6px !important;padding:10px 8px !important;font-size:12px !important;}
   .nav-item .nav-icon svg{width:19px;height:19px;}
+  .csel-panel.open{max-height:min(240px,38vh);}
 }
 @media(prefers-reduced-motion:reduce){
   .nav-lens{transition:none !important;}
@@ -2032,6 +2048,7 @@ window.va = window.va || function () { (window.vaq = window.vaq || []).push(argu
           <button class="util-btn" id="exportXlsxBtn">📊 Excel</button>
         </div>
         <button class="util-btn" id="importBtn" style="margin-top:2px;">⬆️ Import data from file</button>
+        <button class="util-btn" id="rollbackImportBtn" type="button" style="display:none;margin-top:8px;">↩️ Undo last import</button>
         <button class="util-btn danger" id="resetBtn">🗑️ Reset all data</button>
       </div>
     </div>
@@ -2312,6 +2329,7 @@ window.va = window.va || function () { (window.vaq = window.vaq || []).push(argu
 const STORE_KEY = 'attend_data_v4';
 const SETTINGS_KEY = 'attend_settings_v4';
 const ONB_KEY = 'attend_onboarded_v1';
+const IMPORT_ROLLBACK_KEY = 'attend_import_rollback_v1';
 const accents = [
   {name:'red', rgb:'255,110,110'},
   {name:'blue', rgb:'122,162,255'},
@@ -2352,6 +2370,11 @@ function save(){
   if(window.classmarkCloudSync && typeof window.classmarkCloudSync.schedule === 'function') window.classmarkCloudSync.schedule();
   if(typeof window.pushWidgetSync === 'function') window.pushWidgetSync();
 }
+function cloneState(value){ return JSON.parse(JSON.stringify(value)); }
+function loadImportRollback(){ const checkpoint=load(IMPORT_ROLLBACK_KEY,null); return checkpoint&&checkpoint.state&&Array.isArray(checkpoint.state.subjects)?checkpoint:null; }
+function updateRollbackAction(){ const button=document.getElementById('rollbackImportBtn'); if(!button)return; const checkpoint=loadImportRollback(); button.style.display=checkpoint?'':'none'; button.disabled=!checkpoint; if(checkpoint) button.textContent=`↩️ Undo last import${checkpoint.subjectCount!=null?` (${checkpoint.subjectCount} subjects)`:''}`; }
+function setImportRollback(checkpoint){ try{localStorage.setItem(IMPORT_ROLLBACK_KEY,JSON.stringify(checkpoint));}catch(e){showToast('Could not save the import rollback point');} updateRollbackAction(); }
+function clearImportRollback(){ try{localStorage.removeItem(IMPORT_ROLLBACK_KEY);}catch(e){} updateRollbackAction(); }
 /* Keep a valid, minimal target so percentage math never divides by zero. */
 function clampTarget(v, fallback){
   const n = parseInt(v, 10);
@@ -2437,6 +2460,14 @@ document.addEventListener('pointerdown', (e)=>{
     '.icon-btn, .btn, .robot-swatch'
   );
   if(el) haptic(H.tap);
+}, {passive:true});
+/* Give otherwise-unclassified app controls the same tactile response. Richer
+   action handlers below remain responsible for attendance, save, delete, and
+   slider patterns, so those controls are excluded to avoid double feedback. */
+document.addEventListener('pointerdown', (e)=>{
+  const el = e.target.closest('button, [role="button"], summary, .timetable-row, .reorder-row');
+  if(!el || el.matches('.nav-item, .style-chip, .accent-dot, .swatch, .tone-chip, .mode-chip, .csel-btn, .icon-btn, .btn, .robot-swatch, .action-btn, .subject-card, .reorder-handle')) return;
+  haptic(H.tap);
 }, {passive:true});
 /* ---------- Active date: which day new marks apply to (defaults to today, can backfill past dates) ---------- */
 let activeDate = todayStr();
@@ -2905,13 +2936,24 @@ document.getElementById('importInput').onchange = (e)=>{
         alert('That backup has no valid subjects. Nothing was imported.');
         return;
       }
-      state = normalized; save(); renderAll();
       const dropped = parsed.subjects.length - normalized.subjects.length;
-      showToast(dropped > 0 ? `Imported ${normalized.subjects.length} subjects (${dropped} invalid skipped)` : 'Data imported');
+      const summary = dropped > 0 ? `${normalized.subjects.length} subjects (${dropped} invalid skipped)` : `${normalized.subjects.length} subjects`;
+      showConfirm('Import this backup?', `This will replace the current attendance workspace with ${summary}. You can undo this import from Export & Data.`, ()=>{
+        setImportRollback({state:cloneState(state),subjectCount:state.subjects.length,createdAt:new Date().toISOString()});
+        state=normalized; save(); renderAll();
+        showToast(dropped > 0 ? `Imported ${normalized.subjects.length} subjects (${dropped} invalid skipped)` : 'Data imported');
+      });
     }catch(err){ alert('Could not read that file as an Attendance backup.'); }
     finally { e.target.value = ''; }
   };
   reader.readAsText(file);
+};
+document.getElementById('rollbackImportBtn').onclick=()=>{
+  const checkpoint=loadImportRollback(); if(!checkpoint){updateRollbackAction();return;}
+  showConfirm('Undo last import?','Restore the exact workspace from before the last import? Changes made after that import will be replaced.',()=>{
+    state=normalizeState(checkpoint.state); clearImportRollback(); save(); renderAll();
+    if(window.renderClassTimetable) window.renderClassTimetable(); showToast('Import undone');
+  });
 };
 document.getElementById('resetBtn').onclick = ()=>{
   showConfirm('Reset everything?', "Delete all subjects and attendance data? This can't be undone unless you exported a backup.", ()=>{
@@ -4262,6 +4304,7 @@ document.getElementById('confirmOkBtn').onclick = ()=>{
 /* ---------- Render all ---------- */
 function renderAll(){
   renderStats(); renderHero(); renderSubjects(); renderHomeCards(); renderGraphSelect(); renderGraph();
+  updateRollbackAction();
   renderHeatSelect(); renderHeatmap(); syncAccentDots(); updateSettingsSummaries();
   renderWeekRecap(); renderDayLog(); renderReorderList();
 }
@@ -4493,6 +4536,7 @@ ${sourceText}`;
         items=aiItems.map(x=>({name:x.appName||x.erpName,code:x.code||'',present:x.present,absent:x.absent,total:x.present+x.absent,appName:x.appName}));
       }catch(e){
         if(!items.length){
+          openGuide();
           $('aiPreviewTitle').textContent='Could not read this table';
           $('aiPreviewRows').innerHTML='<p class="h3-sub">Classmark could not read the portal table right now. You can add the subjects manually instead.</p><button class="util-btn" type="button" id="aiAddManuallyBtn">Add manually</button>';
           $('aiPreview').style.display='block';
@@ -4500,9 +4544,11 @@ ${sourceText}`;
           showToast('Classmark could not finish the import');
           return;
         }
-        showToast('Gemini could not finish; showing locally recognized rows for review');
+          openGuide();
+          showToast('Gemini could not finish; showing locally recognized rows for review');
       }
     }else if(attendanceImage){
+      openGuide();
       showToast('Gemini is not configured for this website yet. You can still add the schedule manually.'); return;
     }
     if(!items.length){ showToast('Could not read this format. Copy the table with its column headings or upload a screenshot.'); return; }
@@ -4654,6 +4700,7 @@ ${sourceText}`;
     showToast(settings.reminderEnabled?`Timetable saved · ${entries.length} classes · 7:00 PM reminders enabled`:`Timetable saved · ${entries.length} classes · reminders are off`);
   };
   window.renderClassTimetable=renderTimetable;
+  buildCustomSelect($('timetableDay'));
   renderTimetable();
 })();
 
