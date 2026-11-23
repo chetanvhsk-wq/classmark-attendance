@@ -288,6 +288,7 @@ That said, what I built goes well beyond a surface-level fork. The original was 
 - Backfill past dates and edit or remove individual marks
 - Stats: trend graph, 84-day heatmap, weekly recap with a shareable image, day log, subject reordering
 - Reminders via Android Local Notifications or Web Notifications in the browser
+- Haptic feedback via native Capacitor APIs, with vibration fallback in browsers that support it
 - Native Android home-screen widget showing overall % and up to 4 subjects
 - Timetable photos or screenshots with optional Gemini extraction, plus manual timetable editing
 - Local and optional Gemini-assisted attendance import with a review step before applying changes
@@ -316,7 +317,7 @@ The workflow runs on every push. You can also trigger it manually via **Run work
 
 ## Run Locally
 
-**Requirements:** Node 22+, JDK 17, Android SDK (platform + build-tools), Python 3 + Pillow.
+**Requirements:** Node 22+, JDK 17, Android SDK (platform + build-tools), Python 3 + Pillow; macOS and Xcode for iOS builds.
 
 ### Web preview
 
@@ -347,6 +348,8 @@ cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/classma
 ```
 
 Output: `android/app/build/outputs/apk/debug/classmark.apk`
+
+Capacitor haptics work on iOS and Android native builds after syncing the platform. For iOS, run `npx cap add ios` once, then `npx cap sync ios` and open the project in Xcode. Mobile browsers use the Vibration API when available; iOS browsers do not expose a general-purpose web haptics API, so iOS haptics require the native Capacitor app.
 
 The Android Firebase config is intentionally not committed. For local Android builds, download `google-services.json` from Firebase and place it at the repository root. For GitHub Actions, add the complete file contents as a repository secret named `GOOGLE_SERVICES_JSON`; the workflow writes it only during the build.
 

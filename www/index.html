@@ -2325,6 +2325,7 @@ window.va = window.va || function () { (window.vaq = window.vaq || []).push(argu
 
 <script src="vendor/jspdf.umd.min.js"></script>
 <script src="vendor/xlsx.full.min.js"></script>
+<script src="vendor/capacitor-haptics.js"></script>
 <script>
 const STORE_KEY = 'attend_data_v4';
 const SETTINGS_KEY = 'attend_settings_v4';
@@ -2434,6 +2435,25 @@ document.addEventListener('input', (e)=>{
 let hapticsEnabled = true;
 function haptic(pattern){
   if(!hapticsEnabled) return;
+  const capacitor = window.Capacitor;
+  const nativeHaptics = window.CapacitorHaptics;
+  if(capacitor && capacitor.isNativePlatform && capacitor.isNativePlatform() && nativeHaptics){
+    let feedback;
+    if(pattern === H.success || pattern === H.present){
+      feedback = nativeHaptics.Haptics.notification({type:nativeHaptics.NotificationType.Success});
+    }else if(pattern === H.error){
+      feedback = nativeHaptics.Haptics.notification({type:nativeHaptics.NotificationType.Error});
+    }else if(pattern === H.absent || pattern === H.delete){
+      feedback = nativeHaptics.Haptics.notification({type:nativeHaptics.NotificationType.Warning});
+    }else{
+      const style = pattern === H.tap || pattern === H.swipeTick || pattern === H.sliderTick || pattern === H.close
+        ? nativeHaptics.ImpactStyle.Light
+        : pattern === H.longpress ? nativeHaptics.ImpactStyle.Heavy : nativeHaptics.ImpactStyle.Medium;
+      feedback = nativeHaptics.Haptics.impact({style});
+    }
+    Promise.resolve(feedback).catch(()=>{ try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){} });
+    return;
+  }
   try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){}
 }
 const H = {

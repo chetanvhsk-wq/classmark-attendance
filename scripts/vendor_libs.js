@@ -29,6 +29,21 @@ for (const lib of libs) {
 try {
   const esbuild = require('esbuild');
   esbuild.buildSync({
+    entryPoints: [path.join(__dirname, 'capacitor-haptics.js')],
+    bundle: true,
+    format: 'iife',
+    target: ['es2020'],
+    outfile: path.join(vendorDir, 'capacitor-haptics.js'),
+  });
+  console.log('[vendor] capacitor-haptics.js');
+} catch (err) {
+  console.error('[vendor] Capacitor Haptics bundle failed:', err.message);
+  process.exit(1);
+}
+
+try {
+  const esbuild = require('esbuild');
+  esbuild.buildSync({
     entryPoints: [path.join(root, 'www', 'firebase-sync.js')],
     bundle: true,
     format: 'iife',
