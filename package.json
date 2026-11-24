@@ -17,6 +17,7 @@
     "@capacitor/share": "^6.0.0",
     "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.1.0",
     "firebase": "^12.19.0",
     "jspdf": "2.5.1",
     "xlsx": "0.18.5"
