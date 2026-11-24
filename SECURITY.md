@@ -1,6 +1,6 @@
 # Security Policy
 
-**Last reviewed: 21 November 2026**
+**Last reviewed: 25 November 2026**
 
 Classmark handles account credentials through Firebase Authentication and stores
 attendance workspaces in Cloud Firestore. This document explains the project's

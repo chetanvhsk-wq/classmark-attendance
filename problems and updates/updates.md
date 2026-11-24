@@ -69,6 +69,11 @@ These smaller foundation commits are part of the project history even when they 
 - Added canvas-based text rasterization for letters, numbers, punctuation, symbols, and other keyboard input.
 - Replaced the distracting brightness pulsing with stable glyph artwork and subtle hover/press feedback.
 
+## November 24, 2026 — Configurable Home dashboard
+
+- Added Home dashboard settings for up to ten selectable widgets: trend, activity, present/absent mix, target gap, streak, subject snapshot, recent activity, safe-to-skip, need-to-attend, and target progress.
+- Added responsive wrapping and compact widget sizing for small phones and laptop screens so cards do not overlap or force a wide layout.
+
 ## November 19, 2026 — Import reliability and Glass polish
 
 - Added a permanent **Add subject** row below the Home subject list and kept **Add class** available throughout the app.

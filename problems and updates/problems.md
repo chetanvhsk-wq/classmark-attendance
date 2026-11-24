@@ -28,6 +28,12 @@ This project evolved from a local attendance prototype into a synced web and And
 - Changed custom drawing from click-only toggling to smooth paint-board drawing with pointer interpolation, so fast mouse, touch, and stylus swipes do not skip dots.
 - Removed the distracting bright/dull pulse animation; Home glyphs now use a stable appearance with a subtle hover/press interaction.
 
+## Home dashboard customization — 24 November 2026
+
+- Added a configurable Home dashboard with up to ten selectable graph and insight widgets instead of limiting the Home view to four cards.
+- Added responsive grid rules for mini phones, standard phones, long phones, tablets, and laptop-width screens so widgets wrap without overlap or horizontal overflow.
+- Kept widget choices local to the user settings and limited the active selection to ten to protect small-screen readability and performance.
+
 - Parsed pasted, unstructured campus attendance text into reliable course records.
 - Calculated attendance from present and absent counts instead of trusting pasted percentages.
 - Added timetable photo import, timetable editing, daily reminders, and configurable reminder times.

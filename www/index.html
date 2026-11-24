@@ -833,8 +833,23 @@ button{ touch-action:manipulation; }
 .glyph-color-chip{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;}
 .glyph-color-chip.active{border-color:#fff;box-shadow:0 0 0 2px rgb(var(--accent));}
 .glyph-editor-actions{display:flex;justify-content:flex-end;margin-top:8px;}
+#homeWidgetsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 18px;}
+.home-widget{min-width:0;padding:16px;overflow:hidden;}
+.home-widget h3{margin:0 0 8px;font-size:14px;display:flex;justify-content:space-between;gap:8px;}
+.home-widget .widget-value{font-size:24px;font-weight:800;line-height:1.1;}
+.home-widget .widget-sub{font-size:11px;opacity:.62;margin-top:5px;}
+.home-widget.wide{grid-column:1/-1;}
+.widget-bars{display:flex;align-items:flex-end;gap:4px;height:58px;margin-top:10px;}
+.widget-bars i{display:block;flex:1;min-width:4px;border-radius:4px 4px 2px 2px;background:rgba(var(--accent),.75);}
+.widget-meter{height:8px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:10px;}
+.widget-meter i{display:block;height:100%;border-radius:inherit;background:rgb(var(--accent));}
+#homeWidgetSettings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.widget-toggle{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:12px;font-size:12px;cursor:pointer;}
+.widget-toggle input{accent-color:rgb(var(--accent));}
 #homeCardEditorOverlay .sheet{max-height:calc(100dvh - env(safe-area-inset-top,0px) - 8px);}
 @media (max-width:600px){#glyphPresetGrid{max-height:25vh}.glyph-editor-panel{min-height:25vh}.glyph-editor-panel .glyph-editor-grid{min-height:22vh}}
+@media (max-width:390px){#homeWidgetsGrid{grid-template-columns:1fr;gap:9px}#homeWidgetSettings{grid-template-columns:1fr}.home-widget.wide{grid-column:auto}}
+@media (min-width:700px){#homeWidgetsGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.home-widget.wide{grid-column:span 2}}
 @media (max-width:360px){
   .app{padding-left:12px;padding-right:12px;}
   .subject-card{padding-left:14px;padding-right:14px;}
@@ -1747,6 +1762,8 @@ window.va = window.va || function () { (window.vaq = window.vaq || []).push(argu
         <div class="stat-label" id="glyphLabel" style="display:none;">Glyph</div>
       </div>
     </div>
+    <div class="section-title">Your dashboard</div>
+    <div id="homeWidgetsGrid" aria-live="polite"></div>
     <div class="section-title">Subjects</div>
     <div id="subjectsList"></div>
   </div>
@@ -2035,6 +2052,12 @@ window.va = window.va || function () { (window.vaq = window.vaq || []).push(argu
     </div>
 
     <div class="settings-group" id="widgetGroup">
+      <div class="settings-group-title">Home dashboard</div>
+      <div class="card settings-block">
+        <h3>Dashboard widgets<span class="current-val">Up to 10</span></h3>
+        <p class="h3-sub">Choose the graphs and insights you want on Home. The layout adapts to small phones, long phones, tablets, and laptops.</p>
+        <div id="homeWidgetSettings"></div>
+      </div>
       <div class="settings-group-title">Home Screen Widget</div>
       <div class="card settings-block">
         <h3>Attendance widget</h3>
@@ -2366,6 +2389,12 @@ if(typeof settings.glyphEnabled!=='boolean') settings.glyphEnabled=true;
 // Keep the legacy home-card flag aligned with the glyph visibility setting.
 if(settings.homeCards && settings.homeCards.glyph && typeof settings.homeCards.glyph.enabled==='boolean') settings.glyphEnabled=settings.homeCards.glyph.enabled;
 if(settings.homeCards && settings.homeCards.glyph) settings.homeCards.glyph.enabled=settings.glyphEnabled;
+const homeWidgetCatalog=[
+  ['trend','Attendance trend'],['activity','Activity heatmap'],['mix','Present / absent'],['target','Target gap'],['streak','Current streak'],
+  ['subjects','Subject snapshot'],['recent','Recent activity'],['safe','Safe-to-skip insight'],['needs','Need-to-attend insight'],['goal','Target progress']
+];
+if(!Array.isArray(settings.homeWidgets)) settings.homeWidgets=['trend','mix','target','recent'];
+settings.homeWidgets=settings.homeWidgets.filter(id=>homeWidgetCatalog.some(([key])=>key===id)).slice(0,10);
 if(settings.ui === 'soft'){ settings.ui = 'skeu'; settings.skeuTone = 'light'; }
 if(!settings.skeuTone) settings.skeuTone = 'dark';
 
@@ -3415,6 +3444,34 @@ function renderGlyphEditor(){
   document.getElementById('glyphEditorClear').onclick=()=>{settings.glyph.customPattern=[];renderGlyphEditor();renderHomeCards();};
   document.getElementById('glyphTextInput').oninput=e=>{settings.glyph.text=e.target.value;settings.glyph.preset='text';renderGlyphGrid('glyphEditorGrid',true);renderHomeCards();};
 }
+function homeWidgetData(){
+  let present=0,absent=0;state.subjects.forEach(s=>Object.values(s.records||{}).flat().forEach(v=>v==='present'?present++:absent++));
+  const total=present+absent,pct=total?Math.round(present/total*100):0;
+  const targets=state.subjects.map(s=>Number(s.target||settings.target||75));
+  const target=targets.length?Math.round(targets.reduce((a,b)=>a+b,0)/targets.length):75;
+  const bars=Array.from({length:8},(_,i)=>{const d=new Date();d.setDate(d.getDate()-7+i);const k=dateKey(d);let p=0,t=0;state.subjects.forEach(s=>(s.records[k]||[]).forEach(v=>{t++;if(v==='present')p++;}));return t?Math.round(p/t*100):0;});
+  let streak=0;for(let i=0;i<365;i++){const d=new Date();d.setDate(d.getDate()-i);const k=dateKey(d);let any=false,ok=false;state.subjects.forEach(s=>(s.records[k]||[]).forEach(v=>{any=true;if(v==='present')ok=true;}));if(ok)streak++;else if(any||i>0)break;}
+  return {present,absent,total,pct,target,bars,streak};
+}
+function renderHomeWidgets(){
+  const host=document.getElementById('homeWidgetsGrid'),settingsHost=document.getElementById('homeWidgetSettings');if(!host||!settingsHost)return;
+  const d=homeWidgetData(),bar=d.bars.map(v=>`<i style="height:${Math.max(8,v)}%" title="${v}%"></i>`).join('');
+  const cards={
+    trend:['Attendance trend',`<div class="widget-value">${d.pct}%</div><div class="widget-sub">Last 8 logged days</div><div class="widget-bars">${bar}</div>`,'wide'],
+    activity:['Activity heatmap',`<div class="widget-value">${d.total}</div><div class="widget-sub">Classes recorded</div><div class="widget-meter"><i style="width:${d.pct}%"></i></div>`,''],
+    mix:['Present / absent',`<div class="widget-value">${d.present} / ${d.absent}</div><div class="widget-sub">Present versus absent</div>`,''],
+    target:['Target gap',`<div class="widget-value">${d.pct>=d.target?'+'+(d.pct-d.target):d.pct-d.target}%</div><div class="widget-sub">Compared with ${d.target}% target</div><div class="widget-meter"><i style="width:${Math.min(100,d.pct)}%"></i></div>`,''],
+    streak:['Current streak',`<div class="widget-value">${d.streak} day${d.streak===1?'':'s'}</div><div class="widget-sub">Present attendance streak</div>`,''],
+    subjects:['Subject snapshot',`<div class="widget-value">${state.subjects.length}</div><div class="widget-sub">Subjects being tracked</div>`,''],
+    recent:['Recent activity',`<div class="widget-value">${d.total?d.present?'Present':'Absent':'—'}</div><div class="widget-sub">Latest recorded attendance</div>`,''],
+    safe:['Safe-to-skip insight',`<div class="widget-value">${d.pct>=d.target?'On track':'Watch'}</div><div class="widget-sub">Based on your current target</div>`,''],
+    needs:['Need-to-attend insight',`<div class="widget-value">${d.pct<d.target?'Focus':'Stable'}</div><div class="widget-sub">Attendance action for today</div>`,''],
+    goal:['Target progress',`<div class="widget-value">${d.pct}%</div><div class="widget-sub">${Math.max(0,d.target-d.pct)} points to target</div><div class="widget-meter"><i style="width:${Math.min(100,d.pct)}%"></i></div>`,'']
+  };
+  host.innerHTML=settings.homeWidgets.map(id=>{const c=cards[id];return c?`<article class="card home-widget ${c[2]}"><h3>${c[0]}</h3>${c[1]}</article>`:''}).join('');
+  settingsHost.innerHTML=homeWidgetCatalog.map(([id,label])=>`<label class="widget-toggle"><input type="checkbox" data-home-widget="${id}" ${settings.homeWidgets.includes(id)?'checked':''}>${label}</label>`).join('');
+  settingsHost.querySelectorAll('[data-home-widget]').forEach(input=>input.onchange=()=>{const id=input.dataset.homeWidget;const next=new Set(settings.homeWidgets);input.checked?next.add(id):next.delete(id);settings.homeWidgets=[...next].slice(0,10);save();renderHomeWidgets();});
+}
 function renderHomeCards(){
   const cards = settings.homeCards;
   const homeGrid=document.querySelector('.stats-grid');
@@ -3442,6 +3499,7 @@ function renderHomeCards(){
   const state=document.getElementById('homeGlyphState'); if(state) state.textContent=settings.glyphEnabled?'On':'Off';
   document.getElementById('homeGlyphOnChip')?.classList.toggle('active',settings.glyphEnabled);
   document.getElementById('homeGlyphOffChip')?.classList.toggle('active',!settings.glyphEnabled);
+  renderHomeWidgets();
 }
 function openHomeCardEditor(key){
   editingHomeCard=key;
