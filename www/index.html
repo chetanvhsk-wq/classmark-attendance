@@ -813,8 +813,9 @@ button{ touch-action:manipulation; }
 .home-glyph-tile{display:flex;align-items:center;justify-content:center;min-height:92px;overflow:hidden;}
 .home-glyph-grid,.glyph-editor-grid{display:grid;grid-template-columns:repeat(20,1fr);grid-template-rows:repeat(10,1fr);gap:2px;width:100%;max-width:220px;}
 .home-glyph-dot{aspect-ratio:1;border-radius:50%;background:rgba(var(--accent),.14);transition:transform .18s ease,background .18s ease,box-shadow .18s ease;}
-.home-glyph-dot.on{background:var(--glyph-color,rgb(var(--accent)));box-shadow:0 0 8px var(--glyph-color,rgb(var(--accent)));transform:scale(1.12);animation:glyphPulse 1.8s ease-in-out infinite;}
-@keyframes glyphPulse{0%,100%{filter:brightness(.9);opacity:.86}50%{filter:brightness(1.25);opacity:1}}
+.home-glyph-dot.on{background:var(--glyph-color,rgb(var(--accent)));box-shadow:0 0 8px var(--glyph-color,rgb(var(--accent)));transform:scale(1.08);}
+.home-glyph-tile:hover .home-glyph-dot.on,.home-glyph-tile:focus-visible .home-glyph-dot.on{transform:scale(1.14);}
+.home-glyph-tile:active .home-glyph-dot.on{transform:scale(1.18);}
 .glyph-editor-panel{padding:12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);width:100%;min-height:38vh;display:flex;align-items:stretch;}
 .glyph-editor-dot{aspect-ratio:1;border-radius:50%;background:rgba(var(--accent),.12);cursor:crosshair;touch-action:none;}
 .glyph-editor-panel .glyph-editor-grid{max-width:none;width:100%;min-height:32vh;touch-action:none;}
@@ -825,7 +826,6 @@ button{ touch-action:manipulation; }
 .glyph-preset-preview{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;margin-bottom:7px;min-height:34px;}
 .glyph-preset-preview i{aspect-ratio:1;border-radius:50%;background:rgba(var(--accent),.12);}
 .glyph-preset-preview i.on{background:rgb(var(--accent));box-shadow:0 0 3px rgba(var(--accent),.65);}
-.glyph-preset-preview i.on{animation:glyphPulse 1.8s ease-in-out infinite;}
 .glyph-preset.active{border-color:rgb(var(--accent));background:rgba(var(--accent),.12);}
 .glyph-color-row{display:flex;gap:9px;flex-wrap:wrap;margin:10px 0 14px;}
 .glyph-color-chip{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;}
@@ -833,7 +833,6 @@ button{ touch-action:manipulation; }
 .glyph-editor-actions{display:flex;justify-content:flex-end;margin-top:8px;}
 #homeCardEditorOverlay .sheet{max-height:calc(100dvh - env(safe-area-inset-top,0px) - 8px);}
 @media (max-width:600px){#glyphPresetGrid{max-height:25vh}.glyph-editor-panel{min-height:25vh}.glyph-editor-panel .glyph-editor-grid{min-height:22vh}}
-@media (prefers-reduced-motion:reduce){.home-glyph-dot.on,.glyph-preset-preview i.on{animation:none;}}
 @media (max-width:360px){
   .app{padding-left:12px;padding-right:12px;}
   .subject-card{padding-left:14px;padding-right:14px;}
