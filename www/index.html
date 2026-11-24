@@ -56,7 +56,7 @@
   *, *::before, *::after{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-html,body{height:100%;}
+html,body{height:100%;max-width:100%;overflow-x:hidden;}
 html{max-width:100%;overflow-x:hidden;}
 body{
   margin:0;
@@ -109,10 +109,11 @@ body.font-squared .action-btn, body.font-squared .btn{ font-family:'Space Mono',
   margin:0 auto;
   padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(200px + env(safe-area-inset-bottom,0px));
   min-height:100vh;
+  overflow-x:clip;
 }
 body.ui-glass{max-width:100%;overflow-x:hidden;}
 body.ui-glass .app{width:100%;max-width:480px;overflow-x:clip;}
-.view{ display:none; }
+.view{ display:none; min-width:0; max-width:100%; }
 .view.active{ display:block; animation:fadeIn var(--duration-med) ease; }
 @keyframes fadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
 
@@ -338,7 +339,7 @@ body.ui-skeu.tone-light .edit-cal-day.absent{ background:#f7c6c6; color:#a91d1d;
 .hero-num.safe{ color:#4ADE80; } .hero-num.danger{ color:#F87171; }
 .hero-empty{ font-size:13px; opacity:0.5; text-align:center; padding:10px 0; }
 
-.stats-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px;}
+.stats-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-bottom:18px; min-width:0; width:100%;}
 .stat-card{ padding:18px; transition:transform 150ms var(--ease-spring); }
 .stat-card:active{ transform:scale(0.955); transition:transform 70ms ease-out; }
 .stat-num{ font-size:28px; font-weight:800; letter-spacing:-0.02em; }
@@ -835,6 +836,7 @@ button{ touch-action:manipulation; }
 .glyph-editor-actions{display:flex;justify-content:flex-end;margin-top:8px;}
 #homeWidgetsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 18px;}
 .home-widget{min-width:0;padding:16px;overflow:hidden;}
+.home-widget *{max-width:100%;overflow-wrap:anywhere;}
 .home-widget h3{margin:0 0 8px;font-size:14px;display:flex;justify-content:space-between;gap:8px;}
 .home-widget .widget-value{font-size:24px;font-weight:800;line-height:1.1;}
 .home-widget .widget-sub{font-size:11px;opacity:.62;margin-top:5px;}
@@ -846,6 +848,9 @@ button{ touch-action:manipulation; }
 #homeWidgetSettings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
 .widget-toggle{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:12px;font-size:12px;cursor:pointer;}
 .widget-toggle input{accent-color:rgb(var(--accent));}
+.graph-card,.hero-card,.week-recap-card,.daylog-card{min-width:0;max-width:100%;overflow:hidden;}
+.graph-card svg{display:block;max-width:100%;height:auto;}
+.heatmap-wrap{max-width:100%;overflow-x:auto;}
 #homeCardEditorOverlay .sheet{max-height:calc(100dvh - env(safe-area-inset-top,0px) - 8px);}
 @media (max-width:600px){#glyphPresetGrid{max-height:25vh}.glyph-editor-panel{min-height:25vh}.glyph-editor-panel .glyph-editor-grid{min-height:22vh}}
 @media (max-width:390px){#homeWidgetsGrid{grid-template-columns:1fr;gap:9px}#homeWidgetSettings{grid-template-columns:1fr}.home-widget.wide{grid-column:auto}}
