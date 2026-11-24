@@ -814,13 +814,13 @@ button{ touch-action:manipulation; }
 .home-editable:active{transform:scale(.98);}
 .stats-grid.home-odd-count > .home-editable:last-child{grid-column:1 / -1;}
 .home-glyph-tile{display:flex;align-items:center;justify-content:center;min-height:92px;overflow:hidden;}
-.home-glyph-grid,.glyph-editor-grid{display:grid;grid-template-columns:repeat(20,1fr);grid-template-rows:repeat(10,1fr);gap:2px;width:100%;max-width:220px;}
+.home-glyph-grid,.glyph-editor-grid{display:grid;grid-template-columns:repeat(20,minmax(0,1fr));grid-template-rows:repeat(10,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:2px;width:100%;max-width:220px;min-width:0;min-height:0;overflow:hidden;box-sizing:border-box;}
 .home-glyph-dot{aspect-ratio:1;border-radius:50%;background:rgba(var(--accent),.14);transition:transform .18s ease,background .18s ease,box-shadow .18s ease;}
 .home-glyph-dot.on{background:var(--glyph-color,rgb(var(--accent)));box-shadow:0 0 8px var(--glyph-color,rgb(var(--accent)));transform:scale(1.08);}
 .home-glyph-tile:hover .home-glyph-dot.on,.home-glyph-tile:focus-visible .home-glyph-dot.on{transform:scale(1.14);}
 .home-glyph-tile:active .home-glyph-dot.on{transform:scale(1.18);}
-.glyph-editor-panel{padding:12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);width:100%;min-height:38vh;display:flex;align-items:stretch;}
-.glyph-editor-dot{aspect-ratio:1;border-radius:50%;background:rgba(var(--accent),.12);cursor:crosshair;touch-action:none;}
+.glyph-editor-panel{padding:12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);width:100%;min-width:0;min-height:38vh;display:flex;align-items:stretch;overflow:hidden;}
+.glyph-editor-dot{width:100%;height:100%;min-width:0;min-height:0;aspect-ratio:auto;border-radius:50%;background:rgba(var(--accent),.12);cursor:crosshair;touch-action:none;}
 .glyph-editor-panel .glyph-editor-grid{max-width:none;width:100%;min-height:32vh;touch-action:none;}
 .glyph-editor-dot.on{background:var(--glyph-color,rgb(var(--accent)));box-shadow:0 0 5px var(--glyph-color,rgb(var(--accent)));}
 .glyph-preset-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 14px;}
@@ -2061,6 +2061,7 @@ window.va = window.va || function () { (window.vaq = window.vaq || []).push(argu
       <div class="card settings-block">
         <h3>Dashboard widgets<span class="current-val">Up to 10</span></h3>
         <p class="h3-sub">Choose the graphs and insights you want on Home. The layout adapts to small phones, long phones, tablets, and laptops.</p>
+        <label class="widget-toggle" style="margin-bottom:8px;"><input type="checkbox" id="homeWidgetsEnabled"> Show dashboard widgets</label>
         <div id="homeWidgetSettings"></div>
       </div>
       <div class="settings-group-title">Home Screen Widget</div>
@@ -2400,6 +2401,7 @@ const homeWidgetCatalog=[
 ];
 if(!Array.isArray(settings.homeWidgets)) settings.homeWidgets=['trend','mix','target','recent'];
 settings.homeWidgets=settings.homeWidgets.filter(id=>homeWidgetCatalog.some(([key])=>key===id)).slice(0,10);
+if(typeof settings.homeWidgetsEnabled!=='boolean') settings.homeWidgetsEnabled=true;
 if(settings.ui === 'soft'){ settings.ui = 'skeu'; settings.skeuTone = 'light'; }
 if(!settings.skeuTone) settings.skeuTone = 'dark';
 
@@ -3460,6 +3462,8 @@ function homeWidgetData(){
 }
 function renderHomeWidgets(){
   const host=document.getElementById('homeWidgetsGrid'),settingsHost=document.getElementById('homeWidgetSettings');if(!host||!settingsHost)return;
+  host.style.display=settings.homeWidgetsEnabled?'':'none';
+  const master=document.getElementById('homeWidgetsEnabled');if(master){master.checked=settings.homeWidgetsEnabled;master.onchange=()=>{settings.homeWidgetsEnabled=master.checked;save();renderHomeWidgets();};}
   const d=homeWidgetData(),bar=d.bars.map(v=>`<i style="height:${Math.max(8,v)}%" title="${v}%"></i>`).join('');
   const cards={
     trend:['Attendance trend',`<div class="widget-value">${d.pct}%</div><div class="widget-sub">Last 8 logged days</div><div class="widget-bars">${bar}</div>`,'wide'],
@@ -3474,6 +3478,7 @@ function renderHomeWidgets(){
     goal:['Target progress',`<div class="widget-value">${d.pct}%</div><div class="widget-sub">${Math.max(0,d.target-d.pct)} points to target</div><div class="widget-meter"><i style="width:${Math.min(100,d.pct)}%"></i></div>`,'']
   };
   host.innerHTML=settings.homeWidgets.map(id=>{const c=cards[id];return c?`<article class="card home-widget ${c[2]}"><h3>${c[0]}</h3>${c[1]}</article>`:''}).join('');
+  settingsHost.style.display=settings.homeWidgetsEnabled?'':'none';
   settingsHost.innerHTML=homeWidgetCatalog.map(([id,label])=>`<label class="widget-toggle"><input type="checkbox" data-home-widget="${id}" ${settings.homeWidgets.includes(id)?'checked':''}>${label}</label>`).join('');
   settingsHost.querySelectorAll('[data-home-widget]').forEach(input=>input.onchange=()=>{const id=input.dataset.homeWidget;const next=new Set(settings.homeWidgets);input.checked?next.add(id):next.delete(id);settings.homeWidgets=[...next].slice(0,10);save();renderHomeWidgets();});
 }
