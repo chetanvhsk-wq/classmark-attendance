@@ -1,3 +1,6 @@
+<!-- Maintainer note: Every AI-assisted code change must update both
+     problems and updates/problems.md and problems and updates/updates.md.
+     Keep entries factual, dated, and limited to verified changes. -->
 <div align="center">
 
 <img src="icon.png" alt="Classmark icon" width="96" height="96" />

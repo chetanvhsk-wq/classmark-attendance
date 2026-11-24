@@ -18,6 +18,16 @@ This log consolidates the problems documented in tracked commits and the previou
 
 This project evolved from a local attendance prototype into a synced web and Android app. The main problems solved were:
 
+## Glyph editor follow-up fixes — 24 November 2026
+
+- Fixed the glyph editor allowing the Home glyph to disappear because `glyphEnabled` and the legacy Home-card flag could become inconsistent; On/Off remains user-controlled and both flags now stay synchronized.
+- Added the missing reference-style glyph presets: bots, ghost, equalizer, orbit, cat, rocket, fish, UFO, alien, bat, heartbeat, bounce, rain, spinner, ripple, DNA, and clock.
+- Reworked the Heart preset into a centered, visible 20×10 pattern.
+- Replaced the short hand-written text bitmap behavior with canvas rasterization so typed letters, numbers, punctuation, symbols, and other keyboard characters render into the dot grid.
+- Prevented glyph preset overflow by making the preset list scroll inside the editor and sizing the editor panel for smaller screens.
+- Changed custom drawing from click-only toggling to smooth paint-board drawing with pointer interpolation, so fast mouse, touch, and stylus swipes do not skip dots.
+- Removed the distracting bright/dull pulse animation; Home glyphs now use a stable appearance with a subtle hover/press interaction.
+
 - Parsed pasted, unstructured campus attendance text into reliable course records.
 - Calculated attendance from present and absent counts instead of trusting pasted percentages.
 - Added timetable photo import, timetable editing, daily reminders, and configurable reminder times.

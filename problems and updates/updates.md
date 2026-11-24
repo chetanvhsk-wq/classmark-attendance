@@ -1,6 +1,6 @@
 # Classmark Updates
 
-**Last updated: November 21, 2026**
+**Last updated: November 24, 2026**
 
 This file tracks the major features and improvements added to Classmark.
 
@@ -58,6 +58,16 @@ These smaller foundation commits are part of the project history even when they 
 - Made all four Home cards editable: Overall, Subjects, Safe subjects, and Glyph.
 - Restored the persistent floating **Add class** button across the app, while retaining the inline Add subject control below the Home list.
 - Updated the README and changelog to document the restored controls.
+
+## November 24, 2026 — Glyph editor polish
+
+- Added the full reference-inspired glyph preset set, including bots, creatures, utility patterns, and animated-style patterns.
+- Fixed the Heart glyph preview and Home rendering.
+- Kept glyph visibility user-controlled while synchronizing the Home toggle and stored card state so it no longer disables unexpectedly.
+- Made the custom glyph canvas behave like a smooth dot paint board with interpolated mouse, touch, and stylus drawing.
+- Added scrollable preset layout and responsive editor sizing to prevent overflow.
+- Added canvas-based text rasterization for letters, numbers, punctuation, symbols, and other keyboard input.
+- Replaced the distracting brightness pulsing with stable glyph artwork and subtle hover/press feedback.
 
 ## November 19, 2026 — Import reliability and Glass polish
 
