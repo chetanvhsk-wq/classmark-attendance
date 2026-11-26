@@ -814,6 +814,9 @@ button{ touch-action:manipulation; }
 .home-editable:active{transform:scale(.98);}
 .stats-grid.home-odd-count > .home-editable:last-child{grid-column:1 / -1;}
 .home-glyph-tile{display:flex;align-items:center;justify-content:center;min-height:92px;overflow:hidden;}
+.home-glyph-text{max-width:100%;font-size:12px;font-weight:800;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:none;}
+.home-glyph-tile[data-text-mode="on"] .home-glyph-grid{display:none;}
+.home-glyph-tile[data-text-mode="on"] .home-glyph-text{display:block;}
 .home-glyph-grid,.glyph-editor-grid{display:grid;grid-template-columns:repeat(20,minmax(0,1fr));grid-template-rows:repeat(10,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:2px;width:100%;max-width:220px;min-width:0;min-height:0;overflow:hidden;box-sizing:border-box;}
 .home-glyph-dot{aspect-ratio:1;border-radius:50%;background:rgba(var(--accent),.14);transition:transform .18s ease,background .18s ease,box-shadow .18s ease;}
 .home-glyph-dot.on{background:var(--glyph-color,rgb(var(--accent)));box-shadow:0 0 8px var(--glyph-color,rgb(var(--accent)));transform:scale(1.08);}
@@ -831,6 +834,10 @@ button{ touch-action:manipulation; }
 .home-glyph-grid[data-glyph-preset="bounce"][data-glyph-motion="on"] .home-glyph-dot.on,.home-glyph-grid[data-glyph-preset="fish"][data-glyph-motion="on"] .home-glyph-dot.on{animation:glyphBounce 1.5s ease-in-out infinite;}
 .home-glyph-grid[data-glyph-preset="spinner"][data-glyph-motion="on"] .home-glyph-dot.on,.home-glyph-grid[data-glyph-preset="orbit"][data-glyph-motion="on"] .home-glyph-dot.on{animation:glyphSpin 3.2s linear infinite;}
 .home-glyph-grid[data-glyph-preset="blinkBot"][data-glyph-motion="on"] .home-glyph-dot.on,.home-glyph-grid[data-glyph-preset="cat"][data-glyph-motion="on"] .home-glyph-dot.on,.home-glyph-grid[data-glyph-preset="alien"][data-glyph-motion="on"] .home-glyph-dot.on{animation:glyphBlink 3.4s ease-in-out infinite;}
+.home-glyph-grid[data-glyph-preset="streak"][data-glyph-motion="on"] .home-glyph-dot.on,.home-glyph-grid[data-glyph-preset="wave"][data-glyph-motion="on"] .home-glyph-dot.on{animation:glyphWave 1.4s ease-in-out infinite;}
+.home-glyph-grid[data-glyph-preset="equalizer"][data-glyph-motion="on"] .home-glyph-dot.on,.home-glyph-grid[data-glyph-preset="heartbeat"][data-glyph-motion="on"] .home-glyph-dot.on{animation:glyphBreathe .7s ease-in-out infinite;}
+.home-glyph-grid[data-glyph-preset="rain"][data-glyph-motion="on"] .home-glyph-dot.on,.home-glyph-grid[data-glyph-preset="dna"][data-glyph-motion="on"] .home-glyph-dot.on{animation:glyphFloat 1.1s ease-in-out infinite;}
+.home-glyph-grid[data-glyph-preset="ripple"][data-glyph-motion="on"] .home-glyph-dot.on,.home-glyph-grid[data-glyph-preset="clockHands"][data-glyph-motion="on"] .home-glyph-dot.on{animation:glyphSpin 4s linear infinite;}
 .home-glyph-grid[data-glyph-motion="off"] .home-glyph-dot.on{animation:none;}
 @media (prefers-reduced-motion:reduce){.home-glyph-dot.on{animation:none !important;}}
 .glyph-editor-panel{padding:12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);width:100%;min-width:0;min-height:38vh;display:flex;align-items:stretch;overflow:hidden;}
@@ -1778,6 +1785,7 @@ window.va = window.va || function () { (window.vaq = window.vaq || []).push(argu
       </div>
       <div class="card stat-card home-glyph-tile home-editable" id="homeGlyphCard" role="button" tabindex="0" aria-label="Edit Home glyph card">
         <div class="home-glyph-grid" id="homeGlyphGrid" aria-hidden="true"></div>
+        <div class="home-glyph-text" id="homeGlyphText" aria-hidden="true"></div>
         <div class="stat-label" id="glyphLabel" style="display:none;">Glyph</div>
       </div>
     </div>
@@ -2132,6 +2140,7 @@ window.va = window.va || function () { (window.vaq = window.vaq || []).push(argu
       <div class="glyph-color-row" id="glyphColorRow"></div>
       <div id="glyphTextControls" style="display:none;">
         <input type="text" id="glyphTextInput" placeholder="Type any text or keyboard character">
+        <div class="home-glyph-text" id="glyphTextValuePreview" style="display:block;margin:0 0 10px;opacity:.8;" aria-live="polite"></div>
         <div class="style-row" id="glyphTextStyleRow">
           <button type="button" class="style-chip" data-glyph-style="block">Block</button>
           <button type="button" class="style-chip" data-glyph-style="dot">Dot</button>
@@ -3473,11 +3482,12 @@ function renderGlyphEditor(){
   document.getElementById('glyphCustomControls').style.display=settings.glyph.preset==='custom'?'block':'none';
   document.getElementById('glyphTextControls').style.display=settings.glyph.preset==='text'?'block':'none';
   document.getElementById('glyphTextInput').value=settings.glyph.text||'';
+  const textPreview=document.getElementById('glyphTextValuePreview');if(textPreview)textPreview.textContent=String(settings.glyph.text||'');
   document.querySelectorAll('[data-glyph-style]').forEach(el=>{el.classList.toggle('active',(settings.glyph.textStyle||'block')===el.dataset.glyphStyle);el.onclick=()=>{settings.glyph.textStyle=el.dataset.glyphStyle;renderGlyphEditor();renderHomeCards();};});
   renderGlyphGrid('glyphEditorGrid',true);
   bindGlyphDrawing();
   document.getElementById('glyphEditorClear').onclick=()=>{settings.glyph.customPattern=[];renderGlyphEditor();renderHomeCards();};
-  document.getElementById('glyphTextInput').oninput=e=>{settings.glyph.text=e.target.value;settings.glyph.preset='text';renderGlyphGrid('glyphEditorGrid',true);renderHomeCards();};
+  document.getElementById('glyphTextInput').oninput=e=>{settings.glyph.text=e.target.value;settings.glyph.preset='text';const preview=document.getElementById('glyphTextValuePreview');if(preview)preview.textContent=e.target.value;renderGlyphGrid('glyphEditorGrid',true);renderHomeCards();};
 }
 function homeWidgetData(){
   let present=0,absent=0;state.subjects.forEach(s=>Object.values(s.records||{}).flat().forEach(v=>v==='present'?present++:absent++));
@@ -3534,6 +3544,7 @@ function renderHomeCards(){
   }
   if(!settings.glyph) settings.glyph={preset:'streak',color:'accent',customPattern:[],text:'AB',textStyle:'block'};
   if(document.getElementById('homeGlyphGrid') && settings.glyphEnabled) renderGlyphGrid('homeGlyphGrid');
+  const glyphCard=document.getElementById('homeGlyphCard'),glyphText=document.getElementById('homeGlyphText');if(glyphCard&&glyphText){const textMode=settings.glyph.preset==='text';glyphCard.dataset.textMode=textMode?'on':'off';glyphText.textContent=textMode?String(settings.glyph.text||''):'';}
   const state=document.getElementById('homeGlyphState'); if(state) state.textContent=settings.glyphEnabled?'On':'Off';
   document.getElementById('homeGlyphOnChip')?.classList.toggle('active',settings.glyphEnabled);
   document.getElementById('homeGlyphOffChip')?.classList.toggle('active',!settings.glyphEnabled);
