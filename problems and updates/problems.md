@@ -20,6 +20,9 @@ This project evolved from a local attendance prototype into a synced web and And
 
 ## Glyph editor follow-up fixes — 24 November 2026
 
+- Fixed text Block rendering by sampling text color instead of canvas alpha, so the background no longer lights every dot.
+- Added named animation frame behavior for creature, bot, graph, and motion glyph presets.
+
 - Fixed the glyph editor allowing the Home glyph to disappear because `glyphEnabled` and the legacy Home-card flag could become inconsistent; On/Off remains user-controlled and both flags now stay synchronized.
 - Added the missing reference-style glyph presets: bots, ghost, equalizer, orbit, cat, rocket, fish, UFO, alien, bat, heartbeat, bounce, rain, spinner, ripple, DNA, and clock.
 - Reworked the Heart preset into a centered, visible 20×10 pattern.

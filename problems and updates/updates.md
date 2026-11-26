@@ -61,6 +61,8 @@ These smaller foundation commits are part of the project history even when they 
 
 ## November 24, 2026 — Glyph editor polish
 
+- Fixed Block text rasterization and added named motion frames for the animated glyph presets.
+
 - Added the full reference-inspired glyph preset set, including bots, creatures, utility patterns, and animated-style patterns.
 - Fixed the Heart glyph preview and Home rendering.
 - Kept glyph visibility user-controlled while synchronizing the Home toggle and stored card state so it no longer disables unexpectedly.
