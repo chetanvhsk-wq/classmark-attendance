@@ -1954,7 +1954,7 @@ window.va = window.va || function () { (window.vaq = window.vaq || []).push(argu
       <div class="settings-group-title">Home screen</div>
       <div class="card settings-block">
         <h3>Home glyph<span class="current-val" id="homeGlyphState">On</span></h3>
-        <p class="h3-sub">Show or hide the editable animated glyph card on Home. The other four Home cards can be renamed or disabled by tapping them.</p>
+        <p class="h3-sub">Show or hide the editable animated glyph card on Home. Overall and Subjects stay visible; the remaining cards can be renamed or disabled by tapping them.</p>
         <div class="color-mode-row">
           <div class="mode-chip" id="homeGlyphOnChip" tabindex="0">On</div>
           <div class="mode-chip" id="homeGlyphOffChip" tabindex="0">Off</div>
@@ -2127,9 +2127,9 @@ window.va = window.va || function () { (window.vaq = window.vaq || []).push(argu
 <div class="overlay" id="homeCardEditorOverlay">
   <div class="sheet card">
     <h3>Edit Home card</h3>
-    <p class="h3-sub">Customize the label or hide this card from Home.</p>
+    <p class="h3-sub" id="homeCardEditorSubtitle">Customize the label or hide this card from Home.</p>
     <input type="text" id="homeCardLabelInput" maxlength="24" placeholder="Card label">
-    <div class="color-mode-row">
+    <div class="color-mode-row" id="homeCardVisibilityControls">
       <div class="mode-chip" id="homeCardEnabledChip" tabindex="0">Enabled</div>
       <div class="mode-chip" id="homeCardDisabledChip" tabindex="0">Disabled</div>
     </div>
@@ -2415,6 +2415,7 @@ if(!settings.homeCards || typeof settings.homeCards!=='object') settings.homeCar
   if(typeof settings.homeCards[key].label!=='string') settings.homeCards[key].label=label;
   if(typeof settings.homeCards[key].enabled!=='boolean') settings.homeCards[key].enabled=true;
 });
+['overall','subjects'].forEach(key=>{settings.homeCards[key].enabled=true;});
 if(typeof settings.glyphEnabled!=='boolean') settings.glyphEnabled=true;
 // Use the explicit glyph setting as the source of truth; repair stale legacy card state.
 if(settings.homeCards && settings.homeCards.glyph) settings.homeCards.glyph.enabled=settings.glyphEnabled;
@@ -3527,7 +3528,8 @@ function renderHomeCards(){
   [['overall','homeCardOverall','overallLabel'],['subjects','homeCardSubjects','subjectsLabel'],['safe','safeSubjectsCard','safeLabel'],['glyph','homeGlyphCard','glyphLabel']].forEach(([key,cardId,labelId])=>{
     const card=document.getElementById(cardId), label=document.getElementById(labelId);
     if(!card) return;
-    const glyphVisible=key==='glyph' ? settings.glyphEnabled && cards[key].enabled : cards[key].enabled;
+    const requiredVisible=key==='overall'||key==='subjects';
+    const glyphVisible=key==='glyph' ? settings.glyphEnabled && cards[key].enabled : requiredVisible || cards[key].enabled;
     card.style.display=glyphVisible?'':'none';
     if(glyphVisible) visibleCards++;
     card.style.gridColumn='auto';
@@ -3554,8 +3556,11 @@ function renderHomeCards(){
 function openHomeCardEditor(key){
   editingHomeCard=key;
   const cfg=settings.homeCards[key];
+  const alwaysVisible=key==='overall'||key==='subjects';
   if(!settings.glyph) settings.glyph={preset:'streak',color:'accent',customPattern:[],text:'AB',textStyle:'block'};
   document.getElementById('homeCardLabelInput').value=cfg.label;
+  document.getElementById('homeCardEditorSubtitle').textContent=alwaysVisible?'Customize the label for this always-visible card.':'Customize the label or hide this card from Home.';
+  document.getElementById('homeCardVisibilityControls').style.display=alwaysVisible?'none':'';
   document.getElementById('glyphEditorControls').style.display=key==='glyph'?'block':'none';
   if(key==='glyph') renderGlyphEditor();
   document.getElementById('homeCardEnabledChip').classList.toggle('active',cfg.enabled);
@@ -3577,7 +3582,7 @@ function bindHomeCardEditor(){
     const label=document.getElementById('homeCardLabelInput').value.trim();
     if(!label){showToast('Enter a card label');return;}
     settings.homeCards[editingHomeCard].label=label;
-    settings.homeCards[editingHomeCard].enabled=document.getElementById('homeCardEnabledChip').classList.contains('active');
+    settings.homeCards[editingHomeCard].enabled=(editingHomeCard==='overall'||editingHomeCard==='subjects') || document.getElementById('homeCardEnabledChip').classList.contains('active');
     if(editingHomeCard==='glyph') settings.glyphEnabled=settings.homeCards.glyph.enabled;
     save(); renderHomeCards();
     document.getElementById('homeCardEditorOverlay').classList.remove('open');stackRemove('homeCardEditorOverlay');showToast('Home card updated');
