@@ -35,6 +35,9 @@ jobs:
       - name: Install JS dependencies (also vendors jsPDF/SheetJS)
         run: npm ci
 
+      - name: Run project checkup
+        run: npm run checkup
+
       - name: Install Pillow
         run: python -m pip install --disable-pip-version-check pillow==10.4.0
 

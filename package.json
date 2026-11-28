@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "node server.js",
     "vendor": "node scripts/vendor_libs.js",
+    "checkup": "node scripts/checkup.mjs",
+    "cleanup": "node scripts/cleanup.mjs",
     "postinstall": "node scripts/vendor_libs.js"
   },
   "dependencies": {

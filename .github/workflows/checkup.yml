@@ -1,0 +1,26 @@
+name: Project Checkup
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "30 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checkup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies and generated browser assets
+        run: npm ci
+      - name: Run project checkup
+        run: npm run checkup
